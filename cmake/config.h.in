@@ -1,0 +1,13 @@
+#ifndef CONFIG_SAPIEN_INTERNAL_CONFIG_H_
+#define CONFIG_SAPIEN_INTERNAL_CONFIG_H_
+
+// If defined, Sapien was compiled with MKL Intel Math Kernel Library.
+@SAPIEN_USE_MKL@
+
+// If defined, Sapien was compiled with Apple Accelerate framework (BLAS).
+@SAPIEN_USE_ACCELERATE@
+
+// If defined, Sapien was built as a shared library.
+@SAPIEN_USING_SHARED_LIBRARY@
+
+#endif  // CONFIG_SAPIEN_INTERNAL_CONFIG_H_
