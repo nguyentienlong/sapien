@@ -1,6 +1,6 @@
 // Copyright 2018.
 
-#include "sapien/utility/seq_dataset.h"
+#include "sapien/utility/sequential_dataset.h"
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
@@ -11,27 +11,27 @@ using ::testing::ElementsAre;
 using ::testing::DoubleEq;
 using ::testing::FloatEq;
 
-TEST(SeqDataset, InitializeDataset) {
+TEST(SequentialDataset, InitializeDataset) {
   const int M = 3;  // n_samples
   const int N = 2;  // n_features
   double matrix[M*N] = {1, 2, 3, 4, 5, 6};
   double targets[M] = {-1, 1, -1};
 
-  SeqDataset<double> dataset(M, N, matrix, targets);
+  SequentialDataset<double> dataset(M, N, matrix, targets);
 
   EXPECT_EQ(dataset.n_features, 2);
   EXPECT_EQ(dataset.n_samples, 3);
 }
 
-TEST(SeqDataset, AccessIndividualSampleWithDefaultWeights) {
-  typedef SeqDataset<double>::Sample SampleType;
+TEST(SequentialDataset, AccessIndividualSampleWithDefaultWeights) {
+  typedef SequentialDataset<double>::Sample SampleType;
 
   const int M = 3;
   const int N = 2;
   double matrix[M*N] = {1, 2, 3, 4, 5, 6};
   double targets[M] = {-1, 1, -1};
 
-  SeqDataset<double> dataset(M, N, matrix, targets);
+  SequentialDataset<double> dataset(M, N, matrix, targets);
 
   SampleType sample0 = dataset[0];
   SampleType sample1 = dataset[1];
@@ -56,17 +56,17 @@ TEST(SeqDataset, AccessIndividualSampleWithDefaultWeights) {
   EXPECT_THAT(sample2.weight, DoubleEq(1.0));
 }
 
-TEST(SeqDataset, AccessIndividualSampleWithCustomWeights) {
+TEST(SequentialDataset, AccessIndividualSampleWithCustomWeights) {
   const int M = 3;
   const int N = 2;
   float matrix[M*N] = {1, 2, 3, 4, 5, 6};
   float targets[M] = {-1, 1, -1};
   float weights[M] = {0.1, 0.2, 0.3};
 
-  typedef SeqDataset<float>::Sample SampleType;
-  SeqDataset<float> dataset(M, N, matrix, targets, weights);
+  typedef SequentialDataset<float>::Sample SampleType;
+  SequentialDataset<float> dataset(M, N, matrix, targets, weights);
 
-    SampleType sample0 = dataset[0];
+  SampleType sample0 = dataset[0];
   SampleType sample1 = dataset[1];
   SampleType sample2 = dataset[2];
 

@@ -31,33 +31,39 @@ class WeightVector {
   WeightVector(const size_t N, T* weight, T* average_weight = NULL);
   ~WeightVector();
 
+  // We explicitly 'delete' default constructor, copy constructor, and
+  // assignment operator
+  WeightVector() = delete;
+  WeightVector(const WeightVector&) = delete;
+  WeightVector& operator=(const WeightVector&) = delete;
+
   // weight <- weight + alpha * x.
   //
   // WARNING: x must be the same size as weight (equal to n_elem).
-  void Add(const T* x, const T alpha);
+  void PlusAX(const T alpha, const T* x);
 
   // Add alpha * x to the average_weight. n_iter is the current iteration
   // count. See [1] for more details.
   //
   // WARNING: x must be the same size as weight (equal to n_elem).
-  void AddAverage(const T* x, const T alpha, const size_t n_iter);
+  void AveragePlusAX(const size_t n_iter, const T alpha, const T* x);
 
   // Computes dot product between weight and x.
   //
   // WARNING: x must be the same size as weight (equal to n_elem).
   T Dot(const T* x) const;
 
-  // Compute l2-norm of the weight vector.
-  T L2Norm() const;
-
   // Scale weight by scalar alpha.
-  void Scale(const T alpha);
+  void Scal(const T alpha);
 
   // Reset scale to 1.0
   void Reset();
 
   // Return the current scale
-  T CurrentScale() const;
+  T scale() const;
+
+  // Compute l2-norm of the weight vector.
+  T nrm2() const;
 
   // Element accessors
   T& operator()(const size_t i);
@@ -76,13 +82,7 @@ class WeightVector {
   T beta_;
 
   // Current scale
-  T current_scale_;
-
-  // We explicitly 'delete' default constructor, copy constructor, and
-  // assignment operator
-  WeightVector();
-  WeightVector(const WeightVector&);
-  WeightVector& operator=(const WeightVector&);
+  T scale_;
 };
 }  // namespace internal
 }  // namespace sapien

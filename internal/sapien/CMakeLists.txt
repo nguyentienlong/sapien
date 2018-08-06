@@ -8,7 +8,7 @@ set(SAPIEN_INTERNAL_SRC
 
   # utility
   utility/weight_vector.cc
-  utility/seq_dataset.cc
+  utility/sequential_dataset.cc
   utility/stringprintf.cc
   utility/wall_time.cc
 

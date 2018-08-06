@@ -10,7 +10,7 @@
 #include "sapien/sgd/base.h"
 #include "sapien/utility/stringprintf.h"
 #include "sapien/utility/weight_vector.h"
-#include "sapien/utility/seq_dataset.h"
+#include "sapien/utility/sequential_dataset.h"
 #include "sapien/constants.h"
 #include "sapien/internal/sapien_math.h"
 #include "glog/logging.h"
@@ -55,7 +55,7 @@ using internal::sapien_allfinite;
 using internal::StringAppendF;
 using internal::StringPrintf;
 using internal::WeightVector;
-using internal::SeqDataset;
+using internal::SequentialDataset;
 
 // Train one
 void Base::TrainOne(const size_t n_samples,
@@ -70,7 +70,7 @@ void Base::TrainOne(const size_t n_samples,
                     const double weight_pos,
                     const double weight_neg) const {
   // Establish dataset.
-  SeqDataset<double> data(n_samples, n_features, X, y, sample_weight);
+  SequentialDataset<double> data(n_samples, n_features, X, y, sample_weight);
 
   // Extract model options ------------------------------------------------
 
@@ -176,7 +176,7 @@ void Base::TrainOne(const size_t n_samples,
             initial_learning_rate / std::pow(t, inverse_scaling_exp);
       }
 
-      typename SeqDataset<double>::Sample next_sample = data[i];
+      typename SequentialDataset<double>::Sample next_sample = data[i];
       prediction = w.Dot(next_sample.x) + (*intercept);
 
       sumloss += loss->Loss(prediction, next_sample.target);
@@ -235,13 +235,13 @@ void Base::TrainOne(const size_t n_samples,
       if (penalty_type == L2_PENALTY ||
           penalty_type == ELASTIC_NET_PENALTY) {
         // We don't scale by negative scalar.
-        w.Scale(std::max(0.0, 1.0 -
-                         l2_ratio * learning_rate * penalty_strength));
+        w.Scal(std::max(0.0, 1.0 -
+                        l2_ratio * learning_rate * penalty_strength));
       }
 
       // w += update * x + intercept
       if (update != 0) {
-        w.Add(next_sample.x, update);
+        w.PlusAX(update, next_sample.x);
         if (fit_intercept) {
           (*intercept) += update;
         }
@@ -251,7 +251,7 @@ void Base::TrainOne(const size_t n_samples,
       // The averaging process will start after seeing t0 samples
       // TODO(Linh): This is really odd! t - t0 + 1 should be integral!!!
       if ((t0 > 0) && (t0 <= t)) {
-        w.AddAverage(next_sample.x, update, (t - t0 + 1));
+        w.AveragePlusAX((t - t0 + 1), update, next_sample.x);
         (*average_intercept) += (*intercept - *average_intercept)/(t - t0 + 1);
       }
 
@@ -263,7 +263,7 @@ void Base::TrainOne(const size_t n_samples,
           penalty_type == ELASTIC_NET_PENALTY) {
         u += l1_ratio * learning_rate * penalty_strength;
 
-        const double wscale = w.CurrentScale();
+        const double wscale = w.scale();
 
         for (size_t i = 0; i < n_features; ++i) {
           double wi = w[i];
@@ -298,7 +298,7 @@ void Base::TrainOne(const size_t n_samples,
       const char* format = "Weight norm: %.6f, Bias: %.6f, "
           "Iteration count: %lu, Average loss: %.6f";
       StringAppendF(&report_epoch, format,
-                    w.L2Norm(),
+                    w.nrm2(),
                     *intercept,
                     static_cast<size_t>(t - 1),
                     sumloss / n_samples);

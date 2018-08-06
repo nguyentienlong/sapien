@@ -17,7 +17,7 @@ TEST(WeightVector, ScaleFloatVectorByAScalar) {
 
   WeightVector<float> weight(N, v);
   EXPECT_EQ(weight.n_elem, N);
-  weight.Scale(2.0);
+  weight.Scal(2.0);
 
   // Before calling Reset:
   EXPECT_THAT(v, ElementsAre(1, 2, 3));
@@ -34,7 +34,7 @@ TEST(WeightVector, ScaleDoubleVectorByAScalar) {
 
   WeightVector<double> weight(N, v);
   EXPECT_EQ(weight.n_elem, N);
-  weight.Scale(2.0);
+  weight.Scal(2.0);
 
   // Before calling Reset:
   EXPECT_THAT(v, ElementsAre(1, 2, 3));
@@ -53,7 +53,7 @@ TEST(WeightVector, AddWithAnotherVector) {
   WeightVector<double> weight(N, a);
 
   // w = w + 2.0 * x
-  weight.Add(x, 2.0);
+  weight.PlusAX(2.0, x);
 
   // Before calling reset.
   EXPECT_THAT(a, ElementsAre(-1, 2, 7));
@@ -70,8 +70,8 @@ TEST(WeightVector, ScaleVectorByScaleAndAddWithAnotherVector) {
   double x[N] = {-1, 0, 2};
 
   WeightVector<double> weight(N, a);
-  weight.Scale(2.0);
-  weight.Add(x, 4.0);
+  weight.Scal(2.0);
+  weight.PlusAX(4.0, x);
 
   // Before calling Reset, we would expect a = a + 2x.
   EXPECT_THAT(a, ElementsAre(-1, 2, 7));
@@ -88,7 +88,7 @@ TEST(WeightVector, DotWithAnotherVector) {
   double x[N] = {-1, 0, 2};
 
   WeightVector<double> weight(N, a);
-  weight.Scale(2.0);
+  weight.Scal(2.0);
 
   EXPECT_THAT(weight.Dot(x), DoubleEq(10.0));
 
@@ -108,8 +108,8 @@ TEST(WeightVector, AddAverage) {
 
   for (int i = 1; i <= 4; ++i) {
     // weight += 2 * x
-    weight.Add(x, 2);
-    weight.AddAverage(x, 2, i);
+    weight.PlusAX(2, x);
+    weight.AveragePlusAX(i, 2, x);
   }
 
   weight.Reset();
@@ -135,19 +135,19 @@ TEST(WeightVector, AddAverage2) {
 
   // w1 = 2 * w0 + (4, 0) = (6, 4)
   float x1[N] = {4, 0};
-  weight.Scale(2.0);
-  weight.Add(x1, 1.0);
-  weight.AddAverage(x1, 1.0, 1);
+  weight.Scal(2.0);
+  weight.PlusAX(1.0, x1);
+  weight.AveragePlusAX(1, 1.0, x1);
 
   // w2 = 0.5 * w1 = (3, 2)
   float x2[N] = {0, 0};
-  weight.Scale(0.5);
-  weight.AddAverage(x2, 1.0, 2);
+  weight.Scal(0.5);
+  weight.AveragePlusAX(2, 1.0, x2);
 
   // w3 = w2 + (0, 1).
   float x3[N] = {0, 1};
-  weight.Add(x3, 1.0);
-  weight.AddAverage(x3, 1.0, 3);
+  weight.PlusAX(1.0, x3);
+  weight.AveragePlusAX(3, 1.0, x3);
 
   weight.Reset();
 
@@ -161,12 +161,12 @@ TEST(WeightVector, ComputeL1Norm) {
   double w0[N] = {3, 4};
 
   WeightVector<double> weight(N, w0);
-  weight.Scale(2.0);
+  weight.Scal(2.0);
 
-  EXPECT_THAT(weight.L2Norm(), DoubleEq(10.0));
+  EXPECT_THAT(weight.nrm2(), DoubleEq(10.0));
 
   weight.Reset();
-  EXPECT_THAT(weight.L2Norm(), DoubleEq(10.0));
+  EXPECT_THAT(weight.nrm2(), DoubleEq(10.0));
 }
 }  // namespace internal
 }  // namespace sapien

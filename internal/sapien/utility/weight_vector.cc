@@ -11,51 +11,52 @@ WeightVector<T>::WeightVector(const size_t N, T* weight, T* average_weight)
     : n_elem(N),
       weight_(weight),
       average_weight_(average_weight),
-      current_scale_(1.0),
+      scale_(1.0),
       alpha_(0.0),
       beta_(1.0) {
 }
 
 template<typename T>
 WeightVector<T>::~WeightVector() {
-  if (current_scale_ != 1.0) { Reset(); }
+  if (scale_ != 1.0) { Reset(); }
   weight_ = NULL;
   average_weight_ = NULL;
 }
 
 template<typename T>
 void
-WeightVector<T>::Add(const T* x, const T alpha) {
-  sapien_axpy(n_elem, alpha / current_scale_, x, weight_);
+WeightVector<T>::PlusAX(const T alpha, const T* x) {
+  sapien_axpy(n_elem, alpha / scale_, x, weight_);
 }
 
 template<typename T>
 void
-WeightVector<T>::AddAverage(const T* x, const T alpha, const size_t n_iter) {
+WeightVector<T>::AveragePlusAX(const size_t n_iter, const T alpha,
+                               const T* x) {
   if (average_weight_ == NULL) { return; }
   T mu = 1.0 / static_cast<T>(n_iter);
-  sapien_axpy(n_elem, alpha_ * (-alpha / current_scale_),
+  sapien_axpy(n_elem, alpha_ * (-alpha / scale_),
               x, average_weight_);
   if (n_iter > 1) {
     beta_ /= (1.0 - mu);
   }
-  alpha_ += (mu * beta_ * current_scale_);
+  alpha_ += (mu * beta_ * scale_);
 }
 
 template<typename T>
 T WeightVector<T>::Dot(const T* x) const {
-  return current_scale_ * sapien_dot(n_elem, weight_, x);
+  return scale_ * sapien_dot(n_elem, weight_, x);
 }
 
 template<typename T>
-T WeightVector<T>::L2Norm() const {
-  return current_scale_ * sapien_nrm2(n_elem, weight_);
+T WeightVector<T>::nrm2() const {
+  return scale_ * sapien_nrm2(n_elem, weight_);
 }
 
 template<typename T>
-void WeightVector<T>::Scale(const T alpha) {
-  current_scale_ *= alpha;
-  if (current_scale_ < 1e-9) { Reset(); }
+void WeightVector<T>::Scal(const T alpha) {
+  scale_ *= alpha;
+  if (scale_ < 1e-9) { Reset(); }
 }
 
 template<typename T>
@@ -69,12 +70,12 @@ void WeightVector<T>::Reset() {
   }
 
   //! Reset weight vector
-  sapien_scal(n_elem, current_scale_, weight_);
-  current_scale_ = 1.0;
+  sapien_scal(n_elem, scale_, weight_);
+  scale_ = 1.0;
 }
 
 template<typename T>
-T WeightVector<T>::CurrentScale() const { return current_scale_; }
+T WeightVector<T>::scale() const { return scale_; }
 
 template<typename T>
 T& WeightVector<T>::operator()(const size_t i) {
