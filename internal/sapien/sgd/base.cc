@@ -18,25 +18,22 @@
 namespace sapien {
 namespace sgd {
 
-Base::Base() : model_type(UNDEFINED),
-               options_(Base::Options()) {
+Base::Base() : options_(Base::Options()),
+               loss_functor_(nullptr) {
 }
 
-Base::Base(const ModelType model_type, const Base::Options& options)
-    : model_type(model_type), options_(options) {
+Base::Base(const Base::Options& options)
+    : options_(options),
+      loss_functor_(nullptr) {
+}
+
+void Base::loss_functor(LossFunctor<double>* loss) {
+  loss_functor_.reset(loss);
 }
 
 // TODO(Linh): Validate more options.
-bool Base::Options::IsValid(const ModelType model_type,
-                            std::string* error) const {
+bool Base::Options::IsValid(std::string* error) const {
   bool valid = true;
-
-  // Check loss_type
-  if (!IsValidLossType(model_type, loss_type)) {
-    valid = false;
-    internal::StringAppendF(error, "Invalid loss_type: %s\n",
-                            LossTypeToString(loss_type));
-  }
 
   // Check l1_ratio
   if (l1_ratio < 0 || l1_ratio > 1) {
@@ -73,11 +70,6 @@ void Base::TrainOne(const size_t n_samples,
   SequentialDataset<double> data(n_samples, n_features, X, y, sample_weight);
 
   // Extract model options ------------------------------------------------
-
-  // Loss
-  const std::shared_ptr<LossFunctor> loss =
-      LossTypeToLossFunctor(options_.loss_type,
-                            options_.loss_param);
 
   // Learning rate type and learning rate related params
   const LearningRateType learning_rate_type = options_.learning_rate_type;
@@ -121,8 +113,8 @@ void Base::TrainOne(const size_t n_samples,
 
   // Parameters for appling L1 regularization (see [1])/
   // [1] - Tsuruoka, Y., Tsujii, J., and Ananiadou, S., 2009.
-  double* q = new double[n_features];
-  sapien_set(n_features, 0.0, q);
+  std::unique_ptr<double[]> q(new double[n_features]);
+  sapien_set(n_features, 0.0, q.get());
   double u = 0.0;
 
   // Class weight
@@ -132,8 +124,8 @@ void Base::TrainOne(const size_t n_samples,
   double optimal_init = 0.0;
   if (learning_rate_type == LEARNING_RATE_OPTIMAL) {
     double tmp = std::sqrt(1.0 / std::sqrt(penalty_strength));
-    double init_eta0 = tmp / std::max(1.0, loss->DLoss(-tmp, 1.0));
-    optimal_init = 1.0 / (init_eta0 * penalty_strength);
+    tmp /= std::max(1.0, loss_functor_->FirstDerivative(-tmp, 1.0));
+    optimal_init = 1.0 / (tmp * penalty_strength);
   }
 
   // Prediction value, prediction = dot(w, x) + intercept
@@ -179,7 +171,7 @@ void Base::TrainOne(const size_t n_samples,
       typename SequentialDataset<double>::Sample next_sample = data[i];
       prediction = w.Dot(next_sample.x) + (*intercept);
 
-      sumloss += loss->Loss(prediction, next_sample.target);
+      sumloss += (*loss_functor_)(prediction, next_sample.target);
 
       // Compute update value for this sample based on whethe the algorithm
       // used is  plain old gradient descent or Online Passive Agressive
@@ -196,7 +188,7 @@ void Base::TrainOne(const size_t n_samples,
           continue;
         }
 
-        double l = loss->Loss(prediction, next_sample.target);
+        double l = (*loss_functor_)(prediction, next_sample.target);
         double tau;
 
         if (learning_rate_type == PASSIVE_AGRESSIVE) {
@@ -209,7 +201,7 @@ void Base::TrainOne(const size_t n_samples,
 
         update = tau;
 
-        if (model_type == CLASSIFICATION_MODEL) {
+        if (loss_functor_->IsClassification()) {
           update *= (next_sample.target);
         } else if (next_sample.target - prediction < 0) {
           update *= -1;
@@ -218,7 +210,8 @@ void Base::TrainOne(const size_t n_samples,
         // Compute the derivative of the loss function w.t.t p
         // Cut off when it's too big or too small.
         double dloss;
-        dloss = loss->DLoss(prediction, next_sample.target);
+        dloss = loss_functor_->FirstDerivative(prediction,
+                                               next_sample.target);
         if (dloss < -kMaxDerivativeLoss) {
           dloss = -kMaxDerivativeLoss;
         } else if (dloss > kMaxDerivativeLoss) {
@@ -332,9 +325,6 @@ void Base::TrainOne(const size_t n_samples,
   // To be honest, we don't really need to reset the weight here because
   // the destructor already takes care of this.
   w.Reset();
-
-  // Clean up
-  delete[] q;
 }
 
 }  // namespace sgd

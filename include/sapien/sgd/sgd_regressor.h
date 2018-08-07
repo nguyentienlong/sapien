@@ -2,37 +2,35 @@
 //
 // Author: mail2ngoclinh@gmail.com
 //
-// Stochastic Gradient Descent Regressor.
+// Stochastic Gradient Descent SGDRegressor.
 
-#ifndef INCLUDE_SAPIEN_SGD_REGRESSOR_H_
-#define INCLUDE_SAPIEN_SGD_REGRESSOR_H_
+#ifndef INCLUDE_SAPIEN_SGD_SGD_REGRESSOR_H_
+#define INCLUDE_SAPIEN_SGD_SGD_REGRESSOR_H_
 
 #include <vector>
 #include <string>
+#include <memory>
 
 #include "sapien/sgd/base.h"
 
 namespace sapien {
 namespace sgd {
 
-class Regressor : public Base {
+class SGDRegressor : public Base {
  public:
   // Construct a SGD regressor model with default options.
-  Regressor();
+  SGDRegressor();
 
   // Construct a SGD regressor model with custom options.
-  explicit Regressor(const Regressor::Options& options);
+  explicit SGDRegressor(const SGDRegressor::Options& options);
 
-  // Ctor and assignement operator
-  Regressor(const Regressor& src);
-  Regressor& operator=(const Regressor& rhs);
+  // We explicitly delet ctor and assignement operator
+  SGDRegressor(const SGDRegressor& src) = delete;
+  SGDRegressor& operator=(const SGDRegressor& rhs) = delete;
 
-  // Move ctor and move assignment operator
-  Regressor(Regressor&& src);
-  Regressor& operator=(Regressor&& rhs);
-
-  // Destructor
-  ~Regressor();
+  // And also delete move ctor and move assignment operator
+  SGDRegressor(SGDRegressor&& src) = delete;
+  SGDRegressor& operator=(SGDRegressor&& rhs) = delete;
 
   // Train the model on given dataset.
   //
@@ -75,17 +73,17 @@ class Regressor : public Base {
   size_t n_features() const { return n_features_; }
 
   // Returns the coefficients vector
-  const double* coef() const { return coef_; }
+  const double* coef() const { return coef_.get(); }
 
   // Return the intercept value.
   double intercept() const { return intercept_; }
 
  private:
   size_t n_features_;
-  double* coef_;
+  std::unique_ptr<double[]> coef_;
   double intercept_;
   std::string summary_;
 };
 }  // namespace sgd
 }  // namespace sapien
-#endif  // INCLUDE_SAPIEN_SGD_REGRESSOR_H_
+#endif  // INCLUDE_SAPIEN_SGD_SGD_REGRESSOR_H_

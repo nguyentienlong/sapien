@@ -17,8 +17,8 @@ set(SAPIEN_INTERNAL_SRC
   sgd/base.cc
   sgd/types.cc
   sgd/default_options.cc
-  sgd/classifier.cc
-  sgd/regressor.cc
+  sgd/sgd_classifier.cc
+  sgd/sgd_regressor.cc
 
   # dataset
   dataset/load_mnist.cc

@@ -4,12 +4,13 @@
 //
 // Stochastic Gradient Descent classifier.
 
-#ifndef INCLUDE_SAPIEN_SGD_CLASSIFIER_H_
-#define INCLUDE_SAPIEN_SGD_CLASSIFIER_H_
+#ifndef INCLUDE_SAPIEN_SGD_SGD_CLASSIFIER_H_
+#define INCLUDE_SAPIEN_SGD_SGD_CLASSIFIER_H_
 
 #include <cstddef>  // size_t
 #include <string>
 #include <vector>
+#include <memory>  // unique_ptr
 
 #include "sapien/sgd/base.h"
 
@@ -17,24 +18,21 @@ namespace sapien {
 namespace sgd {
 
 template<typename LabelType>
-class Classifier : public Base {
+class SGDClassifier : public Base {
  public:
   // Construct a SGD classifier model with default options.
-  Classifier();
+  SGDClassifier();
 
   // Construct a SGD classifier model with custom options.
-  explicit Classifier(const Classifier::Options& options);
+  explicit SGDClassifier(const SGDClassifier::Options& options);
 
-  // Copy constructor and assignment operator
-  Classifier(const Classifier& src);
-  Classifier& operator=(const Classifier& rhs);
+  // We explicitly delete copy constructor and assignment operator
+  SGDClassifier(const SGDClassifier& src) = delete;
+  SGDClassifier& operator=(const SGDClassifier& rhs) = delete;
 
-  // Move constructor & move assignment operator
-  Classifier(Classifier&& src);
-  Classifier& operator=(Classifier&& rhs);
-
-  // Destructor
-  ~Classifier();
+  // We also explicitly delete move constructor & move assignment operator
+  SGDClassifier(SGDClassifier&& src) = delete;
+  SGDClassifier& operator=(SGDClassifier&& rhs) = delete;
 
   // Train the model on given dataset.
   // 1. The matrix X has size of [n_samples, n_features] in row-major order.
@@ -107,7 +105,7 @@ class Classifier : public Base {
   //   n_classes * n_features elements in which:
   //   coef[i * n_features .. (i + 1) * n_features] is the coefficients of
   //   the hyperplane associated with class i.
-  const double* coef() const { return coef_; }
+  const double* coef() const { return coef_.get(); }
 
   // Return the 'read-only' poniter to the intercept vector.
   //
@@ -117,7 +115,7 @@ class Classifier : public Base {
   // 2. For multiclass case, the pointer points to an array of n_classes
   //    elements in which intercept[i] is the intercept/bias of the
   //    hyperplane associated with class i.
-  const double* intercept() const { return intercept_; }
+  const double* intercept() const { return intercept_.get(); }
 
   // Returns number of features.
   size_t n_features() const { return n_features_; }
@@ -141,29 +139,29 @@ class Classifier : public Base {
   // If the model us trained with a multiclass dataset, the size of coef_ is
   // n_features_ * n_classes_.
   // [n_classes_, n_features_] or [1, n_features]
-  double* coef_;
+  std::unique_ptr<double[]> coef_;
 
   // intercept vector. The size of intercept_ is determined as follow:
   //     sizeof(intercept_) = (n_classes_ == 2) ? 1 : n_classes_;
-  double* intercept_;
+  std::unique_ptr<double[]> intercept_;
 
   // Unique classes derived from label vector y, all sorted in ascending
   // order.
-  LabelType* classes_;
+  std::unique_ptr<LabelType[]> classes_;
 
   // Summary after training
   std::string summary_;
 
  private:
   // One vs rest
-  void OneVsRest_(const size_t n_samples,
-                  const size_t n_features,
-                  const double* X,
-                  const LabelType* y,
-                  const double* sample_weight,
-                  const double* class_weight,
-                  const size_t c);
+  void OneVsRest(const size_t n_samples,
+                 const size_t n_features,
+                 const double* X,
+                 const LabelType* y,
+                 const double* sample_weight,
+                 const double* class_weight,
+                 const size_t cls);
 };
 }  // namespace sgd
 }  // namespace sapien
-#endif  // INCLUDE_SAPIEN_SGD_CLASSIFIER_H_
+#endif  // INCLUDE_SAPIEN_SGD_SGD_CLASSIFIER_H_

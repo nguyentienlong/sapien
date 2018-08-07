@@ -11,9 +11,6 @@ namespace sgd {
 Base::Options ClassifierDefaultOptions() {
   Base::Options options;
 
-  options.loss_type = HINGE_LOSS;
-  options.loss_param = 1.0;
-
   options.learning_rate_type = LEARNING_RATE_OPTIMAL;
   options.initial_learning_rate = 1.0;
   options.inverse_scaling_exp = 0.5;
@@ -38,9 +35,6 @@ Base::Options ClassifierDefaultOptions() {
 
 Base::Options RegressorDefaultOptions() {
   Base::Options options;
-
-  options.loss_type = SQUARED_LOSS;
-  options.loss_param = 0.1;
 
   options.learning_rate_type = LEARNING_RATE_INVERSE_SCALING;
   options.initial_learning_rate = 0.01;

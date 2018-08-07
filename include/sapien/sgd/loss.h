@@ -19,6 +19,10 @@ namespace sgd {
 // LossFunctor interface. The type T could be either float or double.
 template<typename T>
 struct LossFunctor {
+  // Returns true if this loss functor is used for classification model,
+  // false if it is used for regression model.
+  virtual bool IsClassification() const = 0;
+
   // Evaluate the loss at the prediction p w.r.t the ground truth y.
   virtual T operator()(const T p, const T y) const = 0;
 
@@ -37,6 +41,8 @@ struct LossFunctor {
 //               |-4yp otherwise
 template<typename T>
 struct ModifiedHuberLoss : public LossFunctor<T> {
+  bool IsClassification() const { return true; }
+
   T operator()(const T p, const T y) const;
   T FirstDerivative(const T p, const T y) const;
 };
@@ -50,6 +56,8 @@ struct HingeLoss : public LossFunctor<T> {
 
   HingeLoss(const HingeLoss& src) = delete;
   HingeLoss& operator=(const HingeLoss& rhs) = delete;
+
+  bool IsClassification() const { return true; }
 
   T operator()(const T p, const T y) const;
   T FirstDerivative(const T p, const T y) const;
@@ -68,6 +76,8 @@ struct SquaredHingeLoss : public LossFunctor<T> {
   SquaredHingeLoss(const SquaredHingeLoss& src) = delete;
   SquaredHingeLoss& operator=(const SquaredHingeLoss& rhs) = delete;
 
+  bool IsClassification() const { return true; }
+
   T operator()(const T p, const T y) const;
   T FirstDerivative(const T p, const T y) const;
 
@@ -79,6 +89,8 @@ struct SquaredHingeLoss : public LossFunctor<T> {
 // loss(p, y) = ln(1 + e^(-py)).
 template<typename T>
 struct LogLoss : public LossFunctor<T> {
+  bool IsClassification() const { return true; }
+
   T operator()(const T p, const T y) const;
   T FirstDerivative(const T p, const T y) const;
 };
@@ -87,6 +99,8 @@ struct LogLoss : public LossFunctor<T> {
 // loss(p, y) = 0.5 * (p - y)^2.
 template<typename T>
 struct SquaredLoss : public LossFunctor<T> {
+  bool IsClassification() const { return false; }
+
   T operator()(const T p, const T y) const;
   T FirstDerivative(const T p, const T y) const;
 };
@@ -99,6 +113,8 @@ struct HuberLoss : public LossFunctor<T> {
 
   HuberLoss(const HuberLoss& src) = delete;
   HuberLoss& operator=(const HuberLoss& rhs) = delete;
+
+  bool IsClassification() const { return false; }
 
   T operator()(const T p, const T y) const;
   T FirstDerivative(const T p, const T y) const;
@@ -117,6 +133,8 @@ struct EpsilonInsensitiveLoss : public LossFunctor<T> {
   EpsilonInsensitiveLoss(const EpsilonInsensitiveLoss& src) = delete;
   EpsilonInsensitiveLoss& operator=(const EpsilonInsensitiveLoss& rhs) = delete;
 
+  bool IsClassification() const { return false; }
+
   T operator()(const T p, const T y) const;
   T FirstDerivative(const T p, const T y) const;
 
@@ -133,6 +151,8 @@ struct SquaredEpsilonInsensitiveLoss : public LossFunctor<T> {
 
   SquaredEpsilonInsensitiveLoss(const SquaredEpsilonInsensitiveLoss& src) = delete;  // NOLINT
   SquaredEpsilonInsensitiveLoss& operator=(const SquaredEpsilonInsensitiveLoss& rhs) = delete;  // NOLINT
+
+  bool IsClassification() const { return false; }
 
   T operator()(const T p, const T y) const;
   T FirstDerivative(const T p, const T y) const;

@@ -2,11 +2,11 @@
 //
 // Author: mail2ngoclinh@gmail.com
 //
-// A simple working example of SGD Regressor.
+// A simple working example of SGD SGDRegressor.
 
 #include <iostream>
 
-#include "sapien/sgd/regressor.h"
+#include "sapien/sgd/sgd_regressor.h"
 
 int main(int argc, char** argv) {
   const int n_features = 1;
@@ -15,8 +15,7 @@ int main(int argc, char** argv) {
   double X_train[n_samples] = {0.0, 0.5, 1.0, 2.0};
   double y_train[n_samples] = {0.0, 0.5, 1.0, 2.0};
 
-  sapien::sgd::Regressor::Options options;
-  options.loss_type = sapien::sgd::SQUARED_LOSS;
+  sapien::sgd::SGDRegressor::Options options;
   options.learning_rate_type = sapien::sgd::LEARNING_RATE_CONSTANT;
   options.initial_learning_rate = 0.01;
   options.penalty_type = sapien::sgd::NO_PENALTY;
@@ -26,7 +25,7 @@ int main(int argc, char** argv) {
   options.logging_type = sapien::sgd::PER_EPOCH;
   options.log_to_stdout = true;
 
-  sapien::sgd::Regressor model(options);
+  sapien::sgd::SGDRegressor model(options);
   model.Train(n_samples, n_features, X_train, y_train);
 
   const double* coef = model.coef();

@@ -9,37 +9,24 @@
 
 #include <stddef.h>  // size_t
 #include <string>
+#include <memory>    // unique_ptr
 
 #include "sapien/internal/port.h"
 #include "sapien/sgd/types.h"
 #include "sapien/constants.h"
+#include "sapien/sgd/loss.h"
 
 namespace sapien {
 namespace sgd {
 
 class SAPIEN_EXPORT Base {
  public:
-  const ModelType model_type;
-
   // Options for both SGDClassifier and SGDRegressor.
   struct SAPIEN_EXPORT Options {
     // Returns true if the options struct has a valid configuration.
     // Returns false otherwise, and fills in *error with a message
     // describing the problem.
-    bool IsValid(const ModelType model_type, std::string* error) const;
-
-    // Loss type.
-    LossType loss_type = HINGE_LOSS;
-
-    // Parameter associated with loss type. For example, with HINGE_LOSS
-    // type we have the corresponding loss function (for each sample x):
-    //   loss(p, y) = max(0, threshold - p * y),
-    // where y is the true class label (either -1 or 1), p is the predicted
-    // value, and threshold is the parameter of Hinge loss.
-    //
-    // Note that, not all loss types have parameters (e.g LOG_LOSS), so
-    // for those parameterless loss types this feild has no affect.
-    double loss_param = 1.0;
+    bool IsValid(std::string* error) const;
 
     // Learning rate type.
     LearningRateType learning_rate_type = LEARNING_RATE_OPTIMAL;
@@ -129,12 +116,19 @@ class SAPIEN_EXPORT Base {
   };
 
   Base();
-  Base(const ModelType model_type, const Base::Options& options);
+  explicit Base(const Base::Options& options);
+
+  // Set loss functor
+  void loss_functor(LossFunctor<double>* loss);
+
+  // Returns loss functor
+  const LossFunctor<double>* loss_functor() const {
+    return loss_functor_.get();
+  }
 
  protected:
   const Base::Options& options() const { return options_; }
 
- public:
   void TrainOne(const size_t n_samples,
                 const size_t n_features,
                 const double* X,
@@ -149,6 +143,7 @@ class SAPIEN_EXPORT Base {
 
  private:
   Base::Options options_;
+  std::unique_ptr< LossFunctor<double> > loss_functor_;
 };
 }  // namespace sgd
 }  // namespace sapien

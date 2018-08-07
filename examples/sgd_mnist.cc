@@ -2,12 +2,13 @@
 //
 // Author: mail2ngoclinh@gmail.com
 //
-// An example of using sgd::Classifier to classify MNIST dataset.
+// An example of using SGDClassifier to classify MNIST dataset.
 
 #include <iostream>
 
 #include "sapien/dataset.h"
-#include "sapien/sgd/classifier.h"
+#include "sapien/sgd/sgd_classifier.h"
+#include "sapien/sgd/loss.h"
 #include "glog/logging.h"
 
 using sapien::uint8_t;
@@ -70,9 +71,7 @@ int main(int argc, char** argv) {
 
   // Initialize the model
 
-  sapien::sgd::Classifier<uint8_t>::Options options;
-  options.loss_type = sapien::sgd::HINGE_LOSS;
-  options.loss_param = 1.0;
+  sapien::sgd::SGDClassifier<uint8_t>::Options options;
   options.learning_rate_type = sapien::sgd::LEARNING_RATE_OPTIMAL;
   options.initial_learning_rate = 0.0;
   options.penalty_type = sapien::sgd::L2_PENALTY;
@@ -84,7 +83,8 @@ int main(int argc, char** argv) {
   options.logging_type = sapien::sgd::SILENT;
   options.shuffle = true;
 
-  sapien::sgd::Classifier<uint8_t> model(options);
+  sapien::sgd::SGDClassifier<uint8_t> model(options);
+  model.loss_functor(new sapien::sgd::HingeLoss<double>(1.0));
 
   // Training
 
