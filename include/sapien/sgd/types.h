@@ -21,13 +21,6 @@ enum LoggingType {
   PER_EPOCH
 };
 
-// SGD model type
-enum ModelType {
-  UNDEFINED,
-  CLASSIFICATION_MODEL,
-  REGRESSION_MODEL
-};
-
 // SGD penalty type.
 //
 // 1. NO_PENALTY: No penalty (a.k.a regularization) at all.
