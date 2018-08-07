@@ -118,7 +118,10 @@ class SAPIEN_EXPORT Base {
   Base();
   explicit Base(const Base::Options& options);
 
-  // Set loss functor
+  // Set loss functor.
+  //
+  // User could choose one of the concrete loss functor defined in loss.h
+  // or implement the LossFunctor interface (also defined in loss.h)
   void loss_functor(LossFunctor<double>* loss);
 
   // Returns loss functor

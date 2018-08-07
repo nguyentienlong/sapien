@@ -38,7 +38,7 @@ class SGDClassifier : public Base {
   // 1. The matrix X has size of [n_samples, n_features] in row-major order.
   // 2. The label vector y must have the size of n_samples.
   // TODO(Linh): How about to add another additional parameters to allow
-  // user to, say choose a particular initial values for the coefficients.
+  // user to, say, choose a particular initial values for the coefficients.
   void Train(const size_t n_samples, const size_t n_features,
              const double* X, const LabelType* y);
 
@@ -70,7 +70,7 @@ class SGDClassifier : public Base {
   //
   // For each sample x = [x0, x1] in matrix X, we compute the distances
   // of x to each of the above three hyperplanes, i.e to compute:
-  // coef * intercept (dot product between a matrix coef and column vector
+  // coef * intercept (dot product between matrix coef and column vector
   //                  intercept)
   // If we horizontally stack all these numbers for all samples in X, we
   // would have the decision matrix.
@@ -138,7 +138,6 @@ class SGDClassifier : public Base {
   // with the positive class (classes_[1]).
   // If the model us trained with a multiclass dataset, the size of coef_ is
   // n_features_ * n_classes_.
-  // [n_classes_, n_features_] or [1, n_features]
   std::unique_ptr<double[]> coef_;
 
   // intercept vector. The size of intercept_ is determined as follow:

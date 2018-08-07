@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cstring>  // memcpy
 
+#include "sapien/internal/port.h"
 #include "sapien/sgd/sgd_classifier.h"
 #include "sapien/sgd/default_options.h"
 #include "sapien/metrics.h"
@@ -339,8 +340,16 @@ SGDClassifier<LabelType>::OneVsRest(const size_t n_samples,
   }
 }
 
-template class SGDClassifier<int>;
+// We instantiate SGDClassifier class template for most common
+// integral types.
 template class SGDClassifier<uint8_t>;
+template class SGDClassifier<int8_t>;
+template class SGDClassifier<uint16_t>;
+template class SGDClassifier<int16_t>;
+template class SGDClassifier<uint32_t>;
+template class SGDClassifier<int32_t>;
+template class SGDClassifier<uint64_t>;
+template class SGDClassifier<int64_t>;
 }  // namespace sgd
 }  // namespace sapien
 
