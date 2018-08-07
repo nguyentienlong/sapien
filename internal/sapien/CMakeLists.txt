@@ -13,6 +13,7 @@ set(SAPIEN_INTERNAL_SRC
   utility/wall_time.cc
 
   # sgd
+  sgd/loss.cc
   sgd/base.cc
   sgd/types.cc
   sgd/default_options.cc
