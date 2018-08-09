@@ -198,9 +198,6 @@ class PhiFunction {
   // current_position_.
   double operator()(const double step_size) const;
 
-  // Returns the derivative of Phi at current_step_size_
-  double Derivative() const;
-
   // Returns the derivative of Phi at step_size.
   // This method updates current_step_size_ and current_position_
   double Derivative(const double step_size) const;

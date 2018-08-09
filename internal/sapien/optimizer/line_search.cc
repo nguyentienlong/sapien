@@ -58,16 +58,6 @@ double PhiFunction::operator()(const double step_size) const {
   return (*func_)(current_position_.get());
 }
 
-// Returns the derivative of Phi at current_step_size_
-double PhiFunction::Derivative() const {
-  // The derivative of Phi at current_step_size_ is simply the dot product
-  // of the gradient of func_ at current_position_ and direction_
-  func_->Gradient(current_func_gradient_.get(), current_position_.get());
-  return sapien_dot(func->n_variables(),
-                    current_func_gradient_.get(),
-                    direction_);
-}
-
 // Returns the derivative of Phi at step_size.
 // This methods update current_step_size_ and current_position_
 double PhiFunction::Derivative(const double step_size) const {
@@ -301,11 +291,7 @@ double WolfeLineSearch::Search(FirstOrderFunction* func,
                     summary);
     }
 
-    // Do NOT pass in the current_step_size beacause if we did that,
-    // it would update the current_position_ (expensive), which is
-    // unnecessary because we have already computed current_position_
-    // as a side-product of updating current_phi.
-    phi_gradient = phi_function.Derivative();
+    phi_gradient = phi_function.Derivative(current_step_size);
 
     if (phi_gradient >= sufficient_curvature) {
       // Found Wolfe point.
@@ -362,10 +348,7 @@ double WolfeLineSearch::Refine(PhiFunction* phi_function,
         phi_function->gradient0;
 
     if (current_phi <= sufficient_decrease) {
-      // current_step_size satisfies the sufficient decrease condition.
-      // Evaluate the derivative of Phi at current_step_size. Again
-      // do NOT pass in the current_step_size.
-      phi_gradient = phi_function->Derivative();
+      phi_gradient = phi_function->Derivative(current_step_size);
 
       if (phi_gradient >= sufficient_curvature) {
         // Found Wolfe point
