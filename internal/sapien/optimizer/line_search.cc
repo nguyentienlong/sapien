@@ -62,8 +62,7 @@ double PhiFunction::operator()(const double step_size) const {
 double PhiFunction::Derivative() const {
   // The derivative of Phi at current_step_size_ is simply the dot product
   // of the gradient of func_ at current_position_ and direction_
-  func_->FirstDerivative(current_func_gradient_.get(),
-                         current_position_.get());
+  func_->Gradient(current_func_gradient_.get(), current_position_.get());
   return sapien_dot(func->n_variables(),
                     current_func_gradient_.get(),
                     direction_);
@@ -82,8 +81,7 @@ double PhiFunction::Derivative(const double step_size) const {
   current_step_size_ = step_size;
 
   // Evaluate the gradient of func_ at the current_position_
-  func_->FirstDerivative(current_func_gradient_.get(),
-                         current_position_.get());
+  func_->Gradient(current_func_gradient_.get(), current_position_.get());
 
   // Then the derivative of Phi at step_size is simply the dot product
   // of current_func_gradient_ and direction_
