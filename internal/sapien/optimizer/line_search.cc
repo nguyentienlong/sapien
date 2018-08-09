@@ -379,7 +379,7 @@ double WolfeLineSearch::Refine(PhiFunction* phi_function,
         return current_step_size;
       }
 
-      // Replace right lo endpoint
+      // Replace lo endpoint
       lo = current_step_size;
       phi_lo = current_phi;
       phi_gradient_lo = phi_gradient;
@@ -389,6 +389,7 @@ double WolfeLineSearch::Refine(PhiFunction* phi_function,
       // we replace hi endpoint by current_step_size.
       hi = current_step_size;
       phi_hi = current_phi;
+      delta = delta_step_size;
     }
   }
 
