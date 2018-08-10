@@ -12,6 +12,9 @@ set(SAPIEN_INTERNAL_SRC
   utility/stringprintf.cc
   utility/wall_time.cc
 
+  # optimizer
+  optimizer/line_search.cc
+  
   # sgd
   sgd/loss.cc
   sgd/base.cc
@@ -28,6 +31,7 @@ set(SAPIEN_INTERNAL_SRC
 set(SAPIEN_INTERNAL_HDRS  "")
 file(GLOB SAPIEN_INTERNAL_HDRS
   utility/*.h
+  optimizer/*.h
   sgd/*.h
 )
 
@@ -181,5 +185,6 @@ if (BUILD_TESTING)
   add_subdirectory(math/test)
   add_subdirectory(metrics/test)
   add_subdirectory(utility/test)
+  add_subdirectory(optimizer/test)
   add_subdirectory(sgd/test)
 endif (BUILD_TESTING)

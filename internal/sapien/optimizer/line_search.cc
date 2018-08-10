@@ -7,12 +7,13 @@
 
 #include "sapien/optimizer/line_search.h"
 #include "sapien/internal/sapien_math.h"
-#include "sapien/utility/stringprintf.h"
+#include "sapien/utility/wall_time.h"
 #include "glog/logging.h"
 
 namespace sapien {
 namespace internal {
 
+LineSearch::LineSearch() : options_(LineSearch::Options()) {}
 LineSearch::LineSearch(const LineSearch::Options& options)
     : options_(options) {
 }
@@ -25,7 +26,7 @@ PhiFunction::PhiFunction(const FirstOrderFunction* func,
      : func_(func),
        direction_(direction),
        current_step_size_(0.0),
-       phi0(*(func)(position)),
+       phi0((*func)(position)),
        gradient0(0.0) {
   // Current position. We need to keep tract of this value as well as
   // current step size in order to quickly compute the value and
@@ -48,7 +49,7 @@ PhiFunction::PhiFunction(const FirstOrderFunction* func,
 
 // Evaluate the value of Phi at step_size
 // This method updates current_step_size_ and current_positon_
-double PhiFunction::operator()(const double step_size) const {
+double PhiFunction::operator()(const double step_size) {
   // Update the current_position_
   sapien_axpy(func_->n_variables(),
               step_size - current_step_size_,
@@ -60,7 +61,7 @@ double PhiFunction::operator()(const double step_size) const {
 
 // Returns the derivative of Phi at step_size.
 // This methods update current_step_size_ and current_position_
-double PhiFunction::Derivative(const double step_size) const {
+double PhiFunction::Derivative(const double step_size) {
   // Update the current_position_
   sapien_axpy(func_->n_variables(),
               step_size - current_step_size_,
@@ -82,13 +83,24 @@ double PhiFunction::Derivative(const double step_size) const {
 
 // Armijo line search -----------------------------------------------------
 
+ArmijoLineSearch::ArmijoLineSearch() : LineSearch() {}
 ArmijoLineSearch::ArmijoLineSearch(const LineSearch::Options& options)
     : LineSearch(options) {}
 
-double ArmijoLineSearch::Search(FirstOrderFunction* func,
+double ArmijoLineSearch::Search(const FirstOrderFunction* func,
                                 const double* position,
                                 const double* direction,
                                 LineSearch::Summary* summary) const {
+  double start = WallTimeInSeconds();
+
+  if (summary != nullptr) {
+    summary->search_failed = false;
+    summary->num_armijo_iterations = 0;
+    summary->num_zoom_iterations = 0;
+    summary->num_refine_iterations = 0;
+    summary->total_time_elapsed = 0.0;
+  }
+
   // CHECK parameters
   CHECK_NOTNULL(func);
   CHECK_NOTNULL(position);
@@ -120,6 +132,9 @@ double ArmijoLineSearch::Search(FirstOrderFunction* func,
   int iter = 0;
 
   while (iter < max_iter && current_step_size > options().min_step_size) {
+    if (summary != nullptr) {
+      ++summary->num_armijo_iterations;
+    }
     current_phi = phi_function(current_step_size);
     decrease = phi_function.phi0 + options().sufficient_decrease *
         current_step_size * phi_function.gradient0;
@@ -127,7 +142,7 @@ double ArmijoLineSearch::Search(FirstOrderFunction* func,
     if (current_phi <= decrease) {  // sufficient decrease condition met
       if (summary != nullptr) {
         summary->search_failed = false;
-        summary->message = StringPrintf("%s\n", "SUCCESS");
+        summary->total_time_elapsed = WallTimeInSeconds() - start;
       }
       return current_step_size;  // success
     } else if (iter == 0) {
@@ -168,22 +183,31 @@ double ArmijoLineSearch::Search(FirstOrderFunction* func,
 
   if (summary != nullptr) {
     summary->search_failed = true;
-    summary->message = StringPrintf("%s\n",
-                                    "FAILURE: max_iter was reached, "
-                                    "return min_step_size as a fallback");
+    summary->total_time_elapsed = WallTimeInSeconds() - start;
   }
   return options().min_step_size;
 }
 
 // Wolfe line search ----------------------------------------------------
 
+WolfeLineSearch::WolfeLineSearch() : LineSearch() {}
 WolfeLineSearch::WolfeLineSearch(const LineSearch::Options& options)
     : LineSearch(options) {}
 
-double WolfeLineSearch::Search(FirstOrderFunction* func,
+double WolfeLineSearch::Search(const FirstOrderFunction* func,
                                const double* position,
                                const double* direction,
                                LineSearch::Summary* summary) const {
+  double start = WallTimeInSeconds();
+
+  if (summary != nullptr) {
+    summary->search_failed = false;
+    summary->num_armijo_iterations = 0;
+    summary->num_zoom_iterations = 0;
+    summary->num_refine_iterations = 0;
+    summary->total_time_elapsed = 0.0;
+  }
+
   // CHECK parameters
   CHECK_NOTNULL(func);
   CHECK_NOTNULL(position);
@@ -214,28 +238,17 @@ double WolfeLineSearch::Search(FirstOrderFunction* func,
   // First stage: find armijo_step_size
 
   ArmijoLineSearch armijo(options());
-  LineSearch::Summary armijo_summary;
   double armijo_step_size;
-  armijo_step_size = armijo.Search(func, position, direction,
-                                   &armijo_summary);
+  armijo_step_size = armijo.Search(func, position, direction, summary);
 
   // If Armijo stage failed, we return immediately
-  if (armijo_summary.search_failed) {
-    if (summary != nullptr) {
-      summary->search_failed = true;
-      summary->message = armijo_summary.message;
-    }
+  if (summary != nullptr && summary->search_failed) {
     return armijo_step_size;
   }
 
   if (armijo_step_size >= options().max_step_size) {
     if (summary != nullptr) {
       summary->search_failed = true;
-      summary->message = StringPrintf("%s\n",
-                                      "FAILURE: the result of Armijo "
-                                      "stage was larger than the given "
-                                      "max_step_size. Returned "
-                                      "max_step_size as a fallback");
     }
     return options().max_step_size;
   }
@@ -252,9 +265,7 @@ double WolfeLineSearch::Search(FirstOrderFunction* func,
   if (phi_gradient >= sufficient_curvature) {
     if (summary != nullptr) {
       summary->search_failed = false;
-      summary->message = StringPrintf("SUCCESS: %s\n",
-                                      "Found Wolfe point right after "
-                                      "Armijo stage");
+      summary->total_time_elapsed = WallTimeInSeconds() - start;
     }
     return armijo_step_size;
   }
@@ -268,6 +279,9 @@ double WolfeLineSearch::Search(FirstOrderFunction* func,
   double sufficient_decrease;
 
   while (current_step_size < options().max_step_size) {
+    if (summary != nullptr) {
+      ++summary->num_zoom_iterations;
+    }
     // Save values
     previous_step_size = current_step_size;
     previous_phi = current_phi;
@@ -297,7 +311,7 @@ double WolfeLineSearch::Search(FirstOrderFunction* func,
       // Found Wolfe point.
       if (summary != nullptr) {
         summary->search_failed = false;
-        summary->message = StringPrintf("%s\n", "SUCCESS");
+        summary->total_time_elapsed = WallTimeInSeconds() - start;
       }
       return current_step_size;
     }
@@ -307,9 +321,7 @@ double WolfeLineSearch::Search(FirstOrderFunction* func,
   // Returns max_step_size as a fallback.
   if (summary != nullptr) {
     summary->search_failed = true;
-    summary->message = StringPrintf("FAILURE: %s\n",
-                                    "The zoom stage was failed. "
-                                    "Returned max_step_size as a fallback");
+    summary->total_time_elapsed = WallTimeInSeconds() - start;
   }
   return options().max_step_size;
 }
@@ -319,6 +331,8 @@ double WolfeLineSearch::Refine(PhiFunction* phi_function,
                                double lo, double phi_lo,
                                double hi, double phi_hi,
                                LineSearch::Summary* summary) const {
+  double start = WallTimeInSeconds();
+
   double phi_gradient_lo = phi_function->Derivative(lo);
 
   double current_step_size = lo;
@@ -333,6 +347,9 @@ double WolfeLineSearch::Refine(PhiFunction* phi_function,
   double sufficient_decrease;
 
   while (delta > options().epsilon) {
+    if (summary != nullptr) {
+      ++summary->num_refine_iterations;
+    }
     // Compute the delta step size.
     delta_step_size = (delta * delta * phi_gradient_lo) /
         (2.0 * (phi_lo + delta * phi_gradient_lo - phi_hi));
@@ -354,8 +371,7 @@ double WolfeLineSearch::Refine(PhiFunction* phi_function,
         // Found Wolfe point
         if (summary != nullptr) {
           summary->search_failed = false;
-          summary->message = StringPrintf("SUCCESS: %s\n",
-                                          "at REFINE stage");
+          summary->total_time_elapsed += (WallTimeInSeconds() - start);
         }
         return current_step_size;
       }
@@ -379,8 +395,7 @@ double WolfeLineSearch::Refine(PhiFunction* phi_function,
   // TODO(Linh): Is it a good idea to return current_step_size here?
   if (summary != nullptr) {
     summary->search_failed = true;
-    summary->message = StringPrintf("FAILURE: %s\n",
-                                    "failed at the REFINE stage");
+    summary->total_time_elapsed += (WallTimeInSeconds() - start);
   }
   return current_step_size;
 }

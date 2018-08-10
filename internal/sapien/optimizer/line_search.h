@@ -32,11 +32,15 @@ namespace internal {
 // 3. Update th point: x_(k+1) = x_k + step_size * p_k.
 //
 // Step 2 above is equivalent to find step_size to minimize the function f
-// along the search direction p_k, i.e to find the minimizer of the univariate
-// function g(s) = f(x_k + s * p_k) (s > 0). While finding the exact
-// minimum of this function is hard, expensive, and sometimes unnecessary,
-// in practice we often use some iterative algorithms to approximate
-// this minimizer, most well-known algorithms are: Armijo and Wolfe.
+// along the search direction p_k, i.e to find the minimizer of the
+// univariate function
+//
+//  phi_function(step_size) = f(x_k + step_size * p_k) (step_size > 0).
+//
+// While finding the exact minimum of this function is hard, expensive,
+// and sometimes unnecessary, in practice we often use some iterative
+// algorithms to approximate this minimizer, most well-known algorithms
+// are: Armijo and Wolfe.
 class LineSearch {
  public:
   struct Options {
@@ -49,7 +53,8 @@ class LineSearch {
     // the objective function f along the search direction p_k. More
     // precisely, we are looking for a step size s.t
     //
-    // g(step_size) <= g(0) + sufficient_decrease * step_size * g'(0)
+    // phi_function(step_size) <= phi_function(0) +
+    //                   sufficient_decrease * step_size * phi_function'(0)
     double sufficient_decrease = 1e-4;
 
     // Say, at the current iteration of Armijo / Wolfe line search we found
@@ -84,11 +89,8 @@ class LineSearch {
     // condition, and an additional requirement that the step_size be chosen
     // s.t:
     //
-    //  g'(step_size) >= sufficient_curvature_decrease * g'(0).
-    //
-    //  where:
-    //
-    //  g(step_size) = f(x_k + step_size * d_k).
+    //  phi_function'(step_size) >= sufficient_curvature_decrease *
+    //                              phi_function'(0)
     //
     // Note that: We only implement the Wolfe conditions NOT the strong
     // Wolfe conditions.
@@ -136,14 +138,26 @@ class LineSearch {
 
   // Line search summary
   struct Summary {
+    // Total time elapsed in seconds.
+    double total_time_elapsed = 0.0;
+
+    // Number of Armijo iterations
+    int num_armijo_iterations = 0;
+
+    // Number of iterations in the ZOOM stage in Wolfe line search.
+    // With Armijo line search, this value is always 0.
+    int num_zoom_iterations = 0;
+
+    // Number of itrations in the REFINE stage in Wolfe line search.
+    // With Armijo line search, this value is always 0.
+    int num_refine_iterations = 0;
+
     // If the search returned successfully, this is set to false,
     // otherwise, it is set to true
     bool search_failed = false;
-
-    // The reason why search was failed.
-    std::string message = "";
   };
 
+  LineSearch();
   explicit LineSearch(const LineSearch::Options& options);
   virtual ~LineSearch() {}
 
@@ -152,7 +166,7 @@ class LineSearch {
   // a direction, returns a step_size.
   // Note that, it is the caller's resposibility to make sure that the size
   // of position as well as direction is the same as func->n_variables().
-  virtual double Search(FirstOrderFunction* func,
+  virtual double Search(const FirstOrderFunction* func,
                         const double* position,
                         const double* direction,
                         LineSearch::Summary* summary = nullptr) const = 0;
@@ -196,11 +210,11 @@ class PhiFunction {
   //
   // Note that, this methods update the current_step_size_ and
   // current_position_.
-  double operator()(const double step_size) const;
+  double operator()(const double step_size);
 
   // Returns the derivative of Phi at step_size.
   // This method updates current_step_size_ and current_position_
-  double Derivative(const double step_size) const;
+  double Derivative(const double step_size);
 
  private:
   const FirstOrderFunction* func_;
@@ -217,17 +231,18 @@ class PhiFunction {
 //
 //     1. We start out with step_size = initial_step_size (typically 1.0).
 //
-//     2. Initially we know three things: g(0), g'(0), and
-//        g(initial_step_size) where g(s) = func(position + s * direction).
-//
+//     2. Initially we know three things: phi_function(0), phi_function'(0),
+//        and phi_function(initial_step_size).
 //        We'll use parabolic interpolation to estimate the minimum.
 //
 //     3. In the successive iteration, we'll use cubic interpolation to
 //        estimate the minimum. The informations used by cubic interpolation
-//        are: g(0), g'(0), g(current_step_size), current_step_size,
-//        g(previous_step_size), and previous_step_size.
+//        are: phi_function(0), phi_function'(0),
+//        phi_function(current_step_size), current_step_size,
+//        phi_function(previous_step_size), and previous_step_size.
 class ArmijoLineSearch : public LineSearch {
  public:
+  ArmijoLineSearch();
   explicit ArmijoLineSearch(const LineSearch::Options& options);
   virtual ~ArmijoLineSearch() {}
 
@@ -238,7 +253,7 @@ class ArmijoLineSearch : public LineSearch {
   //
   // Note that, it is the caller's resposibility to make sure that the size
   // of position as well as direction is the same as func->n_variables().
-  virtual double Search(FirstOrderFunction* func,
+  virtual double Search(const FirstOrderFunction* func,
                         const double* position,
                         const double* direction,
                         LineSearch::Summary* summary = nullptr) const;
@@ -247,8 +262,9 @@ class ArmijoLineSearch : public LineSearch {
 // Wolfe line search interface
 class WolfeLineSearch : public LineSearch {
  public:
+  WolfeLineSearch();
   explicit WolfeLineSearch(const LineSearch::Options& options);
-  virtual WolfeLineSearch() {}
+  virtual ~WolfeLineSearch() {}
 
   // Perform line search.
   // Given the first order (differentiable) function func, a position,
@@ -256,7 +272,7 @@ class WolfeLineSearch : public LineSearch {
   //
   // Note that, it's the caller's responsility to make sure thar the size
   // of position as well as direction is the same as func->n_variables().
-  virtual double Search(FirstOrderFunction* func,
+  virtual double Search(const FirstOrderFunction* func,
                         const double* position,
                         const double* direction,
                         LineSearch::Summary* summary = nullptr) const;
