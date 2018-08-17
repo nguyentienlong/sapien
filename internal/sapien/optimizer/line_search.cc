@@ -20,14 +20,16 @@ LineSearch::LineSearch(const LineSearch::Options& options)
 
 // Phi function ----------------------------------------------------------
 
-PhiFunction::PhiFunction(const FirstOrderFunction* func,
+PhiFunction::PhiFunction(const LineSearchObjectiveFunctor* func,
                          const double* position,
-                         const double* direction)
-     : func_(func),
-       direction_(direction),
-       current_step_size_(0.0),
-       phi0((*func)(position)),
-       gradient0(0.0) {
+                         const double* direction,
+                         const double direction_scale)
+    : func_(func),
+      direction_scale_(direction_scale),
+      direction_(direction),
+      current_step_size_(0.0),
+      phi0((*func)(position)),
+      gradient0(0.0) {
   // Current position. We need to keep tract of this value as well as
   // current step size in order to quickly compute the value and
   // the derivative of phi at a given step_size
@@ -42,9 +44,9 @@ PhiFunction::PhiFunction(const FirstOrderFunction* func,
   func->Gradient(current_func_gradient_.get(), position);
 
   // The derivative of Phi at step_size = 0.0
-  const_cast<double&>(gradient0) = sapien_dot(func->n_variables(),
-                                              current_func_gradient_.get(),
-                                              direction);
+  const_cast<double&>(gradient0) = direction_scale *
+      sapien_dot(func->n_variables(), current_func_gradient_.get(),
+                 direction);
 }
 
 // Evaluate the value of Phi at step_size
@@ -52,7 +54,7 @@ PhiFunction::PhiFunction(const FirstOrderFunction* func,
 double PhiFunction::operator()(const double step_size) {
   // Update the current_position_
   sapien_axpy(func_->n_variables(),
-              step_size - current_step_size_,
+              direction_scale_ * (step_size - current_step_size_),
               direction_,
               current_position_.get());
   current_step_size_ = step_size;
@@ -64,7 +66,7 @@ double PhiFunction::operator()(const double step_size) {
 double PhiFunction::Derivative(const double step_size) {
   // Update the current_position_
   sapien_axpy(func_->n_variables(),
-              step_size - current_step_size_,
+              direction_scale_ * (step_size - current_step_size_),
               direction_,
               current_position_.get());
 
@@ -76,9 +78,9 @@ double PhiFunction::Derivative(const double step_size) {
 
   // Then the derivative of Phi at step_size is simply the dot product
   // of current_func_gradient_ and direction_
-  return sapien_dot(func_->n_variables(),
-                    current_func_gradient_.get(),
-                    direction_);
+  return direction_scale_ * sapien_dot(func_->n_variables(),
+                                       current_func_gradient_.get(),
+                                       direction_);
 }
 
 // Armijo line search -----------------------------------------------------
@@ -87,9 +89,10 @@ ArmijoLineSearch::ArmijoLineSearch() : LineSearch() {}
 ArmijoLineSearch::ArmijoLineSearch(const LineSearch::Options& options)
     : LineSearch(options) {}
 
-double ArmijoLineSearch::Search(const FirstOrderFunction* func,
+double ArmijoLineSearch::Search(const LineSearchObjectiveFunctor* func,
                                 const double* position,
                                 const double* direction,
+                                const double direction_scale,
                                 LineSearch::Summary* summary) const {
   double start = WallTimeInSeconds();
 
@@ -117,7 +120,7 @@ double ArmijoLineSearch::Search(const FirstOrderFunction* func,
   CHECK_GT(options().max_iter, 0);
 
   // Construct Phi function
-  PhiFunction phi_function(func, position, direction);
+  PhiFunction phi_function(func, position, direction, direction_scale);
 
   double previous_step_size = 0.0;
   double current_step_size = options().initial_step_size;
@@ -194,9 +197,10 @@ WolfeLineSearch::WolfeLineSearch() : LineSearch() {}
 WolfeLineSearch::WolfeLineSearch(const LineSearch::Options& options)
     : LineSearch(options) {}
 
-double WolfeLineSearch::Search(const FirstOrderFunction* func,
+double WolfeLineSearch::Search(const LineSearchObjectiveFunctor* func,
                                const double* position,
                                const double* direction,
+                               const double direction_scale,
                                LineSearch::Summary* summary) const {
   double start = WallTimeInSeconds();
 
@@ -239,7 +243,8 @@ double WolfeLineSearch::Search(const FirstOrderFunction* func,
 
   ArmijoLineSearch armijo(options());
   double armijo_step_size;
-  armijo_step_size = armijo.Search(func, position, direction, summary);
+  armijo_step_size = armijo.Search(func, position, direction,
+                                   direction_scale, summary);
 
   // If Armijo stage failed, we return immediately
   if (summary != nullptr && summary->search_failed) {
@@ -256,7 +261,7 @@ double WolfeLineSearch::Search(const FirstOrderFunction* func,
   // Zoom stage
 
   // construct Phi function
-  PhiFunction phi_function(func, position, direction);
+  PhiFunction phi_function(func, position, direction, direction_scale);
 
   const double sufficient_curvature =
       options().sufficient_curvature_decrease * phi_function.gradient0;

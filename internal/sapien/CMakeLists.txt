@@ -14,6 +14,8 @@ set(SAPIEN_INTERNAL_SRC
 
   # optimizer
   optimizer/line_search.cc
+  optimizer/line_search_algorithm.cc
+  optimizer/line_search_minimizer.cc
   
   # sgd
   sgd/loss.cc
@@ -185,6 +187,5 @@ if (BUILD_TESTING)
   add_subdirectory(math/test)
   add_subdirectory(metrics/test)
   add_subdirectory(utility/test)
-  add_subdirectory(optimizer/test)
   add_subdirectory(sgd/test)
 endif (BUILD_TESTING)

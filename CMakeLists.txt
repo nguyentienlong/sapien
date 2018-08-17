@@ -206,6 +206,7 @@ endmacro()
 sapien_install_public_headers(internal)
 sapien_install_public_headers(internal/type_traits)
 sapien_install_public_headers(sgd)
+sapien_install_public_headers(optimizer)
 
 # Also setup installation of Sapien config.h configured with the current
 # build options into the installed headers directory.

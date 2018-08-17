@@ -10,3 +10,6 @@ target_link_libraries(sgd_mnist sapien)
 
 add_executable(sgd_regressor sgd_regressor.cc)
 target_link_libraries(sgd_regressor sapien)
+
+add_executable(line_search_minimizer line_search_minimizer.cc)
+target_link_libraries(line_search_minimizer sapien)

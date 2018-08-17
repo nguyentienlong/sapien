@@ -10,10 +10,12 @@
 #include <memory>
 #include <string>
 
-#include "sapien/optimizer/objective_functions.h"
+#include "sapien/optimizer/line_search_minimizer.h"
 
 namespace sapien {
 namespace internal {
+
+using sapien::LineSearchObjectiveFunctor;
 
 // One way to estimate the global minimizer of a continuously differentiable
 // Lipschitz function f is to use iterative method, i.e method that, starting
@@ -163,12 +165,17 @@ class LineSearch {
 
   // Perform the line search.
   // Given the first order (differentiable) function func, a position, and
-  // a direction, returns a step_size.
+  // a direction , returns a step_size.
+  //
+  // The existance of direction_scale here is to allow client to use
+  // direction_scale * direction as as search direction.
+  //
   // Note that, it is the caller's resposibility to make sure that the size
   // of position as well as direction is the same as func->n_variables().
-  virtual double Search(const FirstOrderFunction* func,
+  virtual double Search(const LineSearchObjectiveFunctor* func,
                         const double* position,
                         const double* direction,
+                        const double direction_scale = 1.0,
                         LineSearch::Summary* summary = nullptr) const = 0;
 
  protected:
@@ -178,13 +185,13 @@ class LineSearch {
   LineSearch::Options options_;
 };
 
-// One dimensional function (constructed from FirstOrderFunction) that
-// line search tries to minimize.
+// One dimensional function (constructed from LineSearchObjectiveFunctor)
+// that line search tries to minimize.
 //
 // Denote:
 //
 //  PhiFunction(step_size) = f(position + step_size * direction), in which
-//  f is the FirstOrderFunction.
+//  f is the LineSearchObjectiveFunctor.
 class PhiFunction {
  public:
   // The value of Phi at step_size = 0.0.
@@ -193,14 +200,15 @@ class PhiFunction {
   // The direvative of phi at step_size = 0.0.
   const double gradient0;
 
-  // Construct Phi function from a FirstOrderFunction, a position,
+  // Construct Phi function from a LineSearchObjectiveFunctor, a position,
   // and a direction.
   //
   // Note that, it is caller's responsibility to make sure that the size of
   // position as well as direction is the same as func->n_variables()
-  explicit PhiFunction(const FirstOrderFunction* func,
+  explicit PhiFunction(const LineSearchObjectiveFunctor* func,
                        const double* position,
-                       const double* direction);
+                       const double* direction,
+                       const double direction_scale = 1.0);
 
   // We explicitly delete ctor and assignment operator
   PhiFunction(const PhiFunction& src) = delete;
@@ -217,8 +225,9 @@ class PhiFunction {
   double Derivative(const double step_size);
 
  private:
-  const FirstOrderFunction* func_;
+  const LineSearchObjectiveFunctor* func_;
   const double* direction_;
+  double direction_scale_;
 
   double current_step_size_;
 
@@ -253,9 +262,10 @@ class ArmijoLineSearch : public LineSearch {
   //
   // Note that, it is the caller's resposibility to make sure that the size
   // of position as well as direction is the same as func->n_variables().
-  virtual double Search(const FirstOrderFunction* func,
+  virtual double Search(const LineSearchObjectiveFunctor* func,
                         const double* position,
                         const double* direction,
+                        const double direction_scale = 1.0,
                         LineSearch::Summary* summary = nullptr) const;
 };
 
@@ -272,9 +282,10 @@ class WolfeLineSearch : public LineSearch {
   //
   // Note that, it's the caller's responsility to make sure thar the size
   // of position as well as direction is the same as func->n_variables().
-  virtual double Search(const FirstOrderFunction* func,
+  virtual double Search(const LineSearchObjectiveFunctor* func,
                         const double* position,
                         const double* direction,
+                        const double direction_scale = 1.0,
                         LineSearch::Summary* summary = nullptr) const;
 
  private:
@@ -300,8 +311,8 @@ class WolfeLineSearch : public LineSearch {
 //  f(x1) = f1
 //  f(x2) = f2
 double CubicInterpolate(const double f0, const double g0,
-             const double f1, const double x1,
-             const double f2, const double x2);
+                        const double f1, const double x1,
+                        const double f2, const double x2);
 
 // Quadratic interpolation
 //
