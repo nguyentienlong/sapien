@@ -46,10 +46,6 @@ int main(int argc, char** argv) {
   google::InitGoogleLogging(argv[0]);
   FLAGS_logtostderr = 1;
 
-  LineSearchMinimizer::Options options;
-  options.line_search_direction_type = sapien::STEEPEST_DESCENT;
-  options.max_num_steepest_descent_iterations = 500;
-  options.steepest_descent_tolerance = 1e-4;
   LineSearchMinimizer minimizer;
   Rosenbrock* rosen = new Rosenbrock();
   double solution[2] = {0.0, 0.0};

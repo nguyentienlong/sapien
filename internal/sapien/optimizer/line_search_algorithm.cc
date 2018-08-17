@@ -87,12 +87,10 @@ DoMinimize(const LineSearchObjectiveFunctor* obj_functor,
 
   // The steepest descent algorithm terminates if
   // gradient_norm <= epsilon
-  const double epsilon = options().steepest_descent_tolerance *
-      gradient_norm;
+  const double epsilon = options().tolerance * gradient_norm;
   size_t iter = 0;
 
-  while (iter < options().max_num_steepest_descent_iterations &&
-         gradient_norm > epsilon) {
+  while (iter < options().max_num_iterations && gradient_norm > epsilon) {
     // We use the -gradient as a search direction.
     step_size = line_search->Search(obj_functor, solution, gradient.get(),
                                     -1.0);

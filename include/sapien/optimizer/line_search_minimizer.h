@@ -143,23 +143,21 @@ class SAPIEN_EXPORT LineSearchMinimizer {
     LineSearchType line_search_type = ARMIJO;
     LineSearchDirectionType line_search_direction_type = STEEPEST_DESCENT;
 
-    // Tolerance for steepest descent algorithm.
-    // If line_search_direction_type is set to STEEPEST_DESCENT,
     // LineSearchMinimizer terminates if:
     //
-    //  |current_gradient| <= steepest_descent_tolerance * |initial_gradient|
-    double steepest_descent_tolerance = 1e-2;
+    //  |current_gradient| <= tolerance * |initial_gradient|
+    double tolerance = 1e-4;
 
-    // If line_search_direction_type is set to STEEPEST_DESCENT,
-    // LineSearchMinimizer terminates if
+    // LineSearchMinimizer minimizes an objective function f by generating
+    // a sequence of points {x_k} such that
+    //  f(x_{k+1}) <= f(x_k), for all k >=0.
     //
-    //  current_iteration_count >= max_num_steepest_descent_iterations
-    //
+    // This parameter controls the maximum number of points generated.
     // By default, this value is set to std::numeric_limits<int>::max()
     // meaning that the LineSearchMinimizer only terminates if:
     //
-    //  |current_gradient| <= steepest_descent_tolerance * |initial_gradient|
-    size_t max_num_steepest_descent_iterations = Constant<int>::inf;
+    //  |current_gradient| <= tolerance * |initial_gradient|
+    size_t max_num_iterations = Constant<int>::inf;
 
     // line search specific parameters ------------------------------------
 
