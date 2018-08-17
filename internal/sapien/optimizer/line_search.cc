@@ -20,7 +20,7 @@ LineSearch::LineSearch(const LineSearch::Options& options)
 
 // Phi function ----------------------------------------------------------
 
-PhiFunction::PhiFunction(const LineSearchObjectiveFunctor* func,
+PhiFunction::PhiFunction(const FirstOrderFunction* func,
                          const double* position,
                          const double* direction,
                          const double direction_scale)
@@ -89,7 +89,7 @@ ArmijoLineSearch::ArmijoLineSearch() : LineSearch() {}
 ArmijoLineSearch::ArmijoLineSearch(const LineSearch::Options& options)
     : LineSearch(options) {}
 
-double ArmijoLineSearch::Search(const LineSearchObjectiveFunctor* func,
+double ArmijoLineSearch::Search(const FirstOrderFunction* func,
                                 const double* position,
                                 const double* direction,
                                 const double direction_scale,
@@ -197,7 +197,7 @@ WolfeLineSearch::WolfeLineSearch() : LineSearch() {}
 WolfeLineSearch::WolfeLineSearch(const LineSearch::Options& options)
     : LineSearch(options) {}
 
-double WolfeLineSearch::Search(const LineSearchObjectiveFunctor* func,
+double WolfeLineSearch::Search(const FirstOrderFunction* func,
                                const double* position,
                                const double* direction,
                                const double direction_scale,

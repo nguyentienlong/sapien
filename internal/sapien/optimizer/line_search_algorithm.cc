@@ -56,9 +56,9 @@ std::shared_ptr<LineSearch> LineSearchAlgorithm::GetLineSearch() const {
 }
 
 void
-LineSearchAlgorithm::Minimize(const LineSearchObjectiveFunctor* obj_functor,
+LineSearchAlgorithm::Minimize(const FirstOrderFunction* obj_function,
                               double* solution) const {
-  this->DoMinimize(obj_functor, solution);
+  this->DoMinimize(obj_function, solution);
 }
 
 // Steepest descent --------------------------------------------------------
@@ -69,16 +69,16 @@ SteepestDescent(const LineSearchMinimizer::Options& options)
 
 // Steepest descent algorithm
 void SteepestDescent::
-DoMinimize(const LineSearchObjectiveFunctor* obj_functor,
+DoMinimize(const FirstOrderFunction* obj_function,
            double* solution) const {
-  CHECK_NOTNULL(obj_functor);
+  CHECK_NOTNULL(obj_function);
   CHECK_NOTNULL(solution);
 
-  const size_t n = obj_functor->n_variables();
+  const size_t n = obj_function->n_variables();
 
   // Init gradient
   std::unique_ptr<double[]> gradient(new double[n]);
-  obj_functor->Gradient(gradient.get(), solution);
+  obj_function->Gradient(gradient.get(), solution);
   double gradient_norm = sapien_nrm2(n, gradient.get());
 
   // Init line search
@@ -92,7 +92,7 @@ DoMinimize(const LineSearchObjectiveFunctor* obj_functor,
 
   while (iter < options().max_num_iterations && gradient_norm > epsilon) {
     // We use the -gradient as a search direction.
-    step_size = line_search->Search(obj_functor, solution, gradient.get(),
+    step_size = line_search->Search(obj_function, solution, gradient.get(),
                                     -1.0);
 
     // Update solution
@@ -100,7 +100,7 @@ DoMinimize(const LineSearchObjectiveFunctor* obj_functor,
     sapien_axpy(n, -step_size, gradient.get(), solution);
 
     // Update gradient
-    obj_functor->Gradient(gradient.get(), solution);
+    obj_function->Gradient(gradient.get(), solution);
     gradient_norm = sapien_nrm2(n, gradient.get());
 
     ++iter;
@@ -113,17 +113,17 @@ NonlinearConjugateGradient(const LineSearchMinimizer::Options& options)
     : LineSearchAlgorithm(options) {}
 
 void NonlinearConjugateGradient::
-DoMinimize(const LineSearchObjectiveFunctor* obj_functor,
+DoMinimize(const FirstOrderFunction* obj_function,
            double* solution) const {
-  CHECK_NOTNULL(obj_functor);
+  CHECK_NOTNULL(obj_function);
   CHECK_NOTNULL(solution);
 
-  const size_t n = obj_functor->n_variables();
+  const size_t n = obj_function->n_variables();
 
   // Init gradient
   std::unique_ptr<double[]> gradient(new double[n]);
   std::unique_ptr<double[]> previous_gradient(new double[n]);
-  obj_functor->Gradient(gradient.get(), solution);
+  obj_function->Gradient(gradient.get(), solution);
   double gradient_norm2 = sapien_dot(n, gradient.get(), gradient.get());
   double mid_gradient_norm2, new_gradient_norm2;
 
@@ -148,7 +148,7 @@ DoMinimize(const LineSearchObjectiveFunctor* obj_functor,
 
   while (iter < options().max_num_iterations && gradient_norm2 > epsilon) {
     // Next step_size
-    step_size = line_search->Search(obj_functor, solution,
+    step_size = line_search->Search(obj_function, solution,
                                     search_direction.get());
 
     // Update solution
@@ -158,7 +158,7 @@ DoMinimize(const LineSearchObjectiveFunctor* obj_functor,
     // Update gradient, residual orthogonalization and serach_direction
 
     sapien_copy(n, gradient.get(), previous_gradient.get());
-    obj_functor->Gradient(gradient.get(), solution);
+    obj_function->Gradient(gradient.get(), solution);
     new_gradient_norm2 = sapien_dot(n, gradient.get(), gradient.get());
     mid_gradient_norm2 = sapien_dot(n, gradient.get(),
                                     previous_gradient.get());

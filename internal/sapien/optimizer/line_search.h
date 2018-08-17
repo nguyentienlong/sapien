@@ -15,7 +15,7 @@
 namespace sapien {
 namespace internal {
 
-using sapien::LineSearchObjectiveFunctor;
+using sapien::FirstOrderFunction;
 
 // One way to estimate the global minimizer of a continuously differentiable
 // Lipschitz function f is to use iterative method, i.e method that, starting
@@ -172,7 +172,7 @@ class LineSearch {
   //
   // Note that, it is the caller's resposibility to make sure that the size
   // of position as well as direction is the same as func->n_variables().
-  virtual double Search(const LineSearchObjectiveFunctor* func,
+  virtual double Search(const FirstOrderFunction* func,
                         const double* position,
                         const double* direction,
                         const double direction_scale = 1.0,
@@ -185,13 +185,13 @@ class LineSearch {
   LineSearch::Options options_;
 };
 
-// One dimensional function (constructed from LineSearchObjectiveFunctor)
+// One dimensional function (constructed from FirstOrderFunction)
 // that line search tries to minimize.
 //
 // Denote:
 //
 //  PhiFunction(step_size) = f(position + step_size * direction), in which
-//  f is the LineSearchObjectiveFunctor.
+//  f is the FirstOrderFunction.
 class PhiFunction {
  public:
   // The value of Phi at step_size = 0.0.
@@ -200,12 +200,12 @@ class PhiFunction {
   // The direvative of phi at step_size = 0.0.
   const double gradient0;
 
-  // Construct Phi function from a LineSearchObjectiveFunctor, a position,
+  // Construct Phi function from a FirstOrderFunction, a position,
   // and a direction.
   //
   // Note that, it is caller's responsibility to make sure that the size of
   // position as well as direction is the same as func->n_variables()
-  explicit PhiFunction(const LineSearchObjectiveFunctor* func,
+  explicit PhiFunction(const FirstOrderFunction* func,
                        const double* position,
                        const double* direction,
                        const double direction_scale = 1.0);
@@ -225,7 +225,7 @@ class PhiFunction {
   double Derivative(const double step_size);
 
  private:
-  const LineSearchObjectiveFunctor* func_;
+  const FirstOrderFunction* func_;
   const double* direction_;
   double direction_scale_;
 
@@ -262,7 +262,7 @@ class ArmijoLineSearch : public LineSearch {
   //
   // Note that, it is the caller's resposibility to make sure that the size
   // of position as well as direction is the same as func->n_variables().
-  virtual double Search(const LineSearchObjectiveFunctor* func,
+  virtual double Search(const FirstOrderFunction* func,
                         const double* position,
                         const double* direction,
                         const double direction_scale = 1.0,
@@ -282,7 +282,7 @@ class WolfeLineSearch : public LineSearch {
   //
   // Note that, it's the caller's responsility to make sure thar the size
   // of position as well as direction is the same as func->n_variables().
-  virtual double Search(const LineSearchObjectiveFunctor* func,
+  virtual double Search(const FirstOrderFunction* func,
                         const double* position,
                         const double* direction,
                         const double direction_scale = 1.0,

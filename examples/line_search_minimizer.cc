@@ -10,7 +10,7 @@
 #include "sapien/optimizer/line_search_minimizer.h"
 #include "glog/logging.h"
 
-using sapien::LineSearchObjectiveFunctor;
+using sapien::FirstOrderFunction;
 using sapien::LineSearchMinimizer;
 
 // Rosenbrock function
@@ -18,7 +18,7 @@ using sapien::LineSearchMinimizer;
 //  f(x1, x2) = 100(x2 - x1^2)^2 + (x1 - 1)^2.
 //
 // This function has a unique global minimum at x = [1, 1]
-struct Rosenbrock : public LineSearchObjectiveFunctor {
+struct Rosenbrock : public FirstOrderFunction {
   // Returns the number of variables/dimensions
   int n_variables() const { return 2; }
 

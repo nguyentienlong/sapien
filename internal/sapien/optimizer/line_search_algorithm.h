@@ -14,7 +14,7 @@ namespace sapien {
 namespace internal {
 
 using sapien::LineSearchMinimizer;
-using sapien::LineSearchObjectiveFunctor;
+using sapien::FirstOrderFunction;
 
 // Algorithm factory
 class LineSearchAlgorithm {
@@ -28,9 +28,9 @@ class LineSearchAlgorithm {
   static LineSearchAlgorithm*
   Create(const LineSearchMinimizer::Options& options);
 
-  // Estimiate the global minimizer of an  obj_functor of type
-  // LineSearchObjectiveFunctor and stores the result in solution.
-  void Minimize(const LineSearchObjectiveFunctor* obj_functor,
+  // Estimiate the global minimizer of an  obj_function of type
+  // FirstOrderFunction and stores the result in solution.
+  void Minimize(const FirstOrderFunction* obj_function,
                 double* solution) const;
 
  protected:
@@ -39,7 +39,7 @@ class LineSearchAlgorithm {
 
  private:
   const LineSearchMinimizer::Options& options_;
-  virtual void DoMinimize(const LineSearchObjectiveFunctor* obj_functor,
+  virtual void DoMinimize(const FirstOrderFunction* obj_function,
                           double* solution) const = 0;
 };
 
@@ -49,10 +49,10 @@ class LineSearchAlgorithm {
 class SteepestDescent : public LineSearchAlgorithm {
  public:
   explicit SteepestDescent(const LineSearchMinimizer::Options&
-                                     options);
+                           options);
 
  private:
-  virtual void DoMinimize(const LineSearchObjectiveFunctor* obj_functor,
+  virtual void DoMinimize(const FirstOrderFunction* obj_function,
                           double* solution) const;
 };
 
@@ -63,7 +63,7 @@ class NonlinearConjugateGradient : public LineSearchAlgorithm {
                                       options);
 
  private:
-  virtual void DoMinimize(const LineSearchObjectiveFunctor* obj_functor,
+  virtual void DoMinimize(const FirstOrderFunction* obj_function,
                           double* solution) const;
 };
 

@@ -6,12 +6,12 @@
 namespace sapien {
 
 void LineSearchMinimizer::
-Minimize(const LineSearchObjectiveFunctor* obj_functor, double* solution) {
+Minimize(const FirstOrderFunction* obj_function, double* solution) {
   using internal::LineSearchAlgorithm;
 
   // We delegate work to proper algorithm.
   LineSearchAlgorithm* alg = LineSearchAlgorithm::Create(options());
-  alg->Minimize(obj_functor, solution);
+  alg->Minimize(obj_function, solution);
   delete alg;
 }
 }  // namespace sapien

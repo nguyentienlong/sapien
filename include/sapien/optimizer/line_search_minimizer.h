@@ -35,9 +35,9 @@
 // This function has a unique global minimum at x = [1, 1]
 //
 // # Create Rosenbrock function by implementing the
-//   LineSearchObjectiveFunctor interface
+//   FirstOrderFunction interface
 //
-// struct Rosenbrock : public LineSearchObjectiveFunctor {
+// struct Rosenbrock : public FirstOrderFunction {
 //  int n_variables() const { return 2; }
 //
 //  double operator()(const double* x) const {
@@ -72,29 +72,9 @@
 #include <cstddef>
 
 #include "sapien/internal/port.h"
+#include "sapien/optimizer/objective_functions.h"
 
 namespace sapien {
-
-// The interface for function that can be optimized using line search
-// paradigm.
-struct SAPIEN_EXPORT LineSearchObjectiveFunctor {
-  LineSearchObjectiveFunctor() {}
-  virtual ~LineSearchObjectiveFunctor() {}
-
-  // Returns the number of variables
-  virtual int n_variables() const = 0;
-
-  // Evaluates the value of this function at the given point x.
-  // Note that, it is the caller's responsibility to make sure that the
-  // number of elements in array x is equal to n_variables
-  virtual double operator()(const double* x) const = 0;
-
-  // Evaluates the gradient of this function at the given point x.
-  // Note that, it is the caller's responsibility to make sure that the
-  // number of elements in array x as well as the size of gradient array
-  // are equal to n_variables.
-  virtual void Gradient(double* gradient, const double* x) const = 0;
-};
 
 enum LineSearchType {
   ARMIJO,
@@ -268,7 +248,7 @@ class SAPIEN_EXPORT LineSearchMinimizer {
   LineSearchMinimizer(const LineSearchMinimizer& src) = delete;
   LineSearchMinimizer& operator=(const LineSearchMinimizer& rhs) = delete;
 
-  void Minimize(const LineSearchObjectiveFunctor* obj_functor,
+  void Minimize(const FirstOrderFunction* obj_function,
                 double* solution);
 
  protected:
