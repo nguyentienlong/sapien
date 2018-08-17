@@ -46,13 +46,29 @@ int main(int argc, char** argv) {
   google::InitGoogleLogging(argv[0]);
   FLAGS_logtostderr = 1;
 
-  LineSearchMinimizer minimizer;
+  // Default minimizer using Polack and Ribie're nonlinear conjugate
+  // gradient
+  LineSearchMinimizer m1;
+
+  // Custom minimizer using steepest descent.
+  // Using steepst descent to estimate the global minimizer of Rosenbrock
+  // function is probably the worst decision you'll ever make in your life!
+  LineSearchMinimizer::Options options;
+  options.line_search_direction_type = sapien::STEEPEST_DESCENT;
+  options.max_num_iterations = 500;
+  LineSearchMinimizer m2(options);
+
   Rosenbrock* rosen = new Rosenbrock();
-  double solution[2] = {0.0, 0.0};
-  minimizer.Minimize(rosen, solution);
+  double m1_result[2] = {0.0, 0.0};
+  double m2_result[2] = {0.0, 0.0};
+
+  m1.Minimize(rosen, m1_result);
+  m2.Minimize(rosen, m2_result);
 
   LOG(INFO) << "True minimizer: x* = [1.0, 1.0]";
-  LOG(INFO) << "Estimated minimizer: x = [" << solution[0]
-            << ", " << solution[1] << "]";
+  LOG(INFO) << "Default result: x = [" << m1_result[0] << ", "
+            << m1_result[1] << "]";
+  LOG(INFO) << "Steepest descent result: x = [" << m2_result[0] << ", "
+            << m2_result[1] << "]";
   return 0;
 }

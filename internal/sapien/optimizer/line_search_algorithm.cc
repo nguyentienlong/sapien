@@ -21,9 +21,9 @@ LineSearchAlgorithm* LineSearchAlgorithm::
 Create(const LineSearchMinimizer::Options& options) {
   switch (options.line_search_direction_type) {
     case sapien::STEEPEST_DESCENT:
-      return new LineSearchSteepestDescent(options);
+      return new SteepestDescent(options);
     case sapien::NONLINEAR_CONJUGATE_GRADIENT:
-      return NULL;
+      return new NonlinearConjugateGradient(options);
     case sapien::LBFGS:
       return NULL;
     default:
@@ -63,12 +63,12 @@ LineSearchAlgorithm::Minimize(const LineSearchObjectiveFunctor* obj_functor,
 
 // Steepest descent --------------------------------------------------------
 
-LineSearchSteepestDescent::
-LineSearchSteepestDescent(const LineSearchMinimizer::Options& options)
+SteepestDescent::
+SteepestDescent(const LineSearchMinimizer::Options& options)
     : LineSearchAlgorithm(options) {}
 
 // Steepest descent algorithm
-void LineSearchSteepestDescent::
+void SteepestDescent::
 DoMinimize(const LineSearchObjectiveFunctor* obj_functor,
            double* solution) const {
   CHECK_NOTNULL(obj_functor);
@@ -103,6 +103,81 @@ DoMinimize(const LineSearchObjectiveFunctor* obj_functor,
     obj_functor->Gradient(gradient.get(), solution);
     gradient_norm = sapien_nrm2(n, gradient.get());
 
+    ++iter;
+  }
+}
+
+// Polack and Ribie're nonelinear conjugate gradient  --------------------
+NonlinearConjugateGradient::
+NonlinearConjugateGradient(const LineSearchMinimizer::Options& options)
+    : LineSearchAlgorithm(options) {}
+
+void NonlinearConjugateGradient::
+DoMinimize(const LineSearchObjectiveFunctor* obj_functor,
+           double* solution) const {
+  CHECK_NOTNULL(obj_functor);
+  CHECK_NOTNULL(solution);
+
+  const size_t n = obj_functor->n_variables();
+
+  // Init gradient
+  std::unique_ptr<double[]> gradient(new double[n]);
+  std::unique_ptr<double[]> previous_gradient(new double[n]);
+  obj_functor->Gradient(gradient.get(), solution);
+  double gradient_norm2 = sapien_dot(n, gradient.get(), gradient.get());
+  double mid_gradient_norm2, new_gradient_norm2;
+
+  // Init search direction
+  std::unique_ptr<double[]> search_direction(new double[n]);
+  for (size_t i = 0; i < n; ++i) {
+    search_direction[i] = -gradient[i];
+  }
+
+  // Init line search
+  std::shared_ptr<LineSearch> line_search = GetLineSearch();
+  double step_size;
+
+  // Polack and Ribie're residual orthogonaliation
+  double residual_orthogonalization;
+
+  // The steepest descent algorithm terminates if
+  // gradient_norm2 <= epsilon
+  const double epsilon = options().tolerance * options().tolerance *
+      gradient_norm2;
+  size_t iter = 0;
+
+  while (iter < options().max_num_iterations && gradient_norm2 > epsilon) {
+    // Next step_size
+    step_size = line_search->Search(obj_functor, solution,
+                                    search_direction.get());
+
+    // Update solution
+    // solution = step_size * search_direction + solution
+    sapien_axpy(n, step_size, search_direction.get(), solution);
+
+    // Update gradient, residual orthogonalization and serach_direction
+
+    sapien_copy(n, gradient.get(), previous_gradient.get());
+    obj_functor->Gradient(gradient.get(), solution);
+    new_gradient_norm2 = sapien_dot(n, gradient.get(), gradient.get());
+    mid_gradient_norm2 = sapien_dot(n, gradient.get(),
+                                    previous_gradient.get());
+    residual_orthogonalization =
+        (new_gradient_norm2 - mid_gradient_norm2) / gradient_norm2;
+
+    sapien_scal(n, residual_orthogonalization, search_direction.get());
+    sapien_axpy(n, -1.0, gradient.get(), search_direction.get());
+
+    // CG is restarted (by setting search_direction = -gradient)
+    // whenever a search direction is computed that is not a descent
+    // direction.
+    if (sapien_dot(n, search_direction.get(), gradient.get()) >= 0) {
+      for (size_t i = 0; i < n; ++i) {
+        search_direction[i] = -gradient[i];
+      }
+    }
+    // Finally
+    gradient_norm2 = new_gradient_norm2;
     ++iter;
   }
 }

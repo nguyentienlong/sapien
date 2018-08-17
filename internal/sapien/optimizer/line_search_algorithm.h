@@ -46,15 +46,27 @@ class LineSearchAlgorithm {
 // Concrete algorithm ------------------------------------------------------
 
 // Steepest descent
-class LineSearchSteepestDescent : public LineSearchAlgorithm {
+class SteepestDescent : public LineSearchAlgorithm {
  public:
-  explicit LineSearchSteepestDescent(const LineSearchMinimizer::Options&
+  explicit SteepestDescent(const LineSearchMinimizer::Options&
                                      options);
 
  private:
   virtual void DoMinimize(const LineSearchObjectiveFunctor* obj_functor,
                           double* solution) const;
 };
+
+// Polack and Ribie're nonlinear conjugate gradient
+class NonlinearConjugateGradient : public LineSearchAlgorithm {
+ public:
+  explicit NonlinearConjugateGradient(const LineSearchMinimizer::Options&
+                                      options);
+
+ private:
+  virtual void DoMinimize(const LineSearchObjectiveFunctor* obj_functor,
+                          double* solution) const;
+};
+
 }  // namespace internal
 }  // namespace sapien
 #endif  // INTERNAL_SAPIEN_OPTIMIZER_LINE_SEARCH_ALGORITHM_H_

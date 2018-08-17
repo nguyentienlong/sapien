@@ -70,7 +70,6 @@
 #include <cstddef>
 
 #include "sapien/internal/port.h"
-#include "sapien/constants.h"
 
 namespace sapien {
 
@@ -140,8 +139,14 @@ enum LineSearchDirectionType {
 class SAPIEN_EXPORT LineSearchMinimizer {
  public:
   struct SAPIEN_EXPORT Options {
+    // Line search type to compute step_size at each iteration
+    // By default Armijo line search will be used.
     LineSearchType line_search_type = ARMIJO;
-    LineSearchDirectionType line_search_direction_type = STEEPEST_DESCENT;
+
+    // By default Polack and Ribie're Nonlinear conjugate gradient
+    // will be used
+    LineSearchDirectionType line_search_direction_type =
+        NONLINEAR_CONJUGATE_GRADIENT;
 
     // LineSearchMinimizer terminates if:
     //
@@ -153,11 +158,7 @@ class SAPIEN_EXPORT LineSearchMinimizer {
     //  f(x_{k+1}) <= f(x_k), for all k >=0.
     //
     // This parameter controls the maximum number of points generated.
-    // By default, this value is set to std::numeric_limits<int>::max()
-    // meaning that the LineSearchMinimizer only terminates if:
-    //
-    //  |current_gradient| <= tolerance * |initial_gradient|
-    size_t max_num_iterations = Constant<int>::inf;
+    size_t max_num_iterations = 50;
 
     // line search specific parameters ------------------------------------
 
