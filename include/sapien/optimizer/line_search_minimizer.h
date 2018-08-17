@@ -16,8 +16,8 @@
 //
 // 2. while iter < max_iter and |gradient| > epsilon * |initial_gradient|:
 //
-//    - Compute a descent search_direction. Choices are: STEEPES_DESCENT,
-//      CONJUGATE_GRADIENT, and LBFGS.
+//    - Compute a descent search_direction. Choices are: STEEPEST_DESCENT,
+//      NONLINEAR_CONJUGATE_GRADIENT, and LBFGS.
 //
 //    - Use line search (ARMIJO or WOLFE) to find a step_size
 //
@@ -25,6 +25,8 @@
 //      x <- x + step_size * search_direction
 //      iter <- iter + 1
 //      gradient <- f'(x)
+//      update search_direction based on STEEPEST_DESCENT,
+//      NONLINEAR_CONJUGATE_GRADIENT, or LBFGS
 //
 // Example: Estimating the global minimizer of Rosenbrock function:
 //
