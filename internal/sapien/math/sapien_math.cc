@@ -387,6 +387,102 @@ template<> int sapien_imax(const int N, const double* X) {
   }
   return ret;
 }
+
+// Compute x^T * Diag * y, in which
+//
+//  x, y are two n-dimensional vectors, Diag is N by N diagonal matrix.
+
+#define X_DIAG_Y_TERM(i) (x[i] * diag[i] * y[i])
+
+template<typename T>
+T sapien_xDiagy(const int N, const T* x, const T* diag, const T* y) {
+  T ret = T(0.0);
+  int n, i;
+  n = N;
+  i = n >> 5;  // n = 32 * i + left_over
+
+  if (i) {
+    n -= (i << 5);
+    do {
+      ret += (X_DIAG_Y_TERM(0) + X_DIAG_Y_TERM(1) + X_DIAG_Y_TERM(2) +
+              X_DIAG_Y_TERM(3) + X_DIAG_Y_TERM(4) + X_DIAG_Y_TERM(5) +
+              X_DIAG_Y_TERM(6) + X_DIAG_Y_TERM(7) + X_DIAG_Y_TERM(8) +
+              X_DIAG_Y_TERM(9) + X_DIAG_Y_TERM(10) + X_DIAG_Y_TERM(11) +
+              X_DIAG_Y_TERM(12) + X_DIAG_Y_TERM(13) + X_DIAG_Y_TERM(14) +
+              X_DIAG_Y_TERM(15) + X_DIAG_Y_TERM(16) + X_DIAG_Y_TERM(17) +
+              X_DIAG_Y_TERM(18) + X_DIAG_Y_TERM(19) + X_DIAG_Y_TERM(20) +
+              X_DIAG_Y_TERM(21) + X_DIAG_Y_TERM(22) + X_DIAG_Y_TERM(23) +
+              X_DIAG_Y_TERM(24) + X_DIAG_Y_TERM(25) + X_DIAG_Y_TERM(26) +
+              X_DIAG_Y_TERM(27) + X_DIAG_Y_TERM(28) + X_DIAG_Y_TERM(29) +
+              X_DIAG_Y_TERM(30) + X_DIAG_Y_TERM(31));
+      x += 32;
+      diag += 32;
+      y += 32;
+    } while (--i);
+  }
+
+  if (n >> 4) {  // n = 16 + left_over
+    ret += (X_DIAG_Y_TERM(0) + X_DIAG_Y_TERM(1) + X_DIAG_Y_TERM(2) +
+            X_DIAG_Y_TERM(3) + X_DIAG_Y_TERM(4) + X_DIAG_Y_TERM(5) +
+            X_DIAG_Y_TERM(6) + X_DIAG_Y_TERM(7) + X_DIAG_Y_TERM(8) +
+            X_DIAG_Y_TERM(9) + X_DIAG_Y_TERM(10) + X_DIAG_Y_TERM(11) +
+            X_DIAG_Y_TERM(12) + X_DIAG_Y_TERM(13) + X_DIAG_Y_TERM(14) +
+            X_DIAG_Y_TERM(15));
+    n -= 16;
+    x += 16;
+    diag += 16;
+    y += 16;
+  }
+
+  if (n >> 3) {  // n = 8 + left_over
+    ret += (X_DIAG_Y_TERM(0) + X_DIAG_Y_TERM(1) + X_DIAG_Y_TERM(2) +
+            X_DIAG_Y_TERM(3) + X_DIAG_Y_TERM(4) + X_DIAG_Y_TERM(5) +
+            X_DIAG_Y_TERM(6) + X_DIAG_Y_TERM(7));
+    n -= 8;
+    x += 8;
+    diag += 8;
+    y += 8;
+  }
+
+  // left_over
+  switch (n) {
+    case 1:
+      ret += X_DIAG_Y_TERM(0);
+      break;
+    case 2:
+      ret += (X_DIAG_Y_TERM(0) + X_DIAG_Y_TERM(1));
+      break;
+    case 3:
+      ret += (X_DIAG_Y_TERM(0) + X_DIAG_Y_TERM(1) + X_DIAG_Y_TERM(2));
+      break;
+    case 4:
+      ret += (X_DIAG_Y_TERM(0) + X_DIAG_Y_TERM(1) + X_DIAG_Y_TERM(2) +
+              X_DIAG_Y_TERM(3));
+      break;
+    case 5:
+      ret += (X_DIAG_Y_TERM(0) + X_DIAG_Y_TERM(1) + X_DIAG_Y_TERM(2) +
+              X_DIAG_Y_TERM(3) + X_DIAG_Y_TERM(4));
+      break;
+    case 6:
+      ret += (X_DIAG_Y_TERM(0) + X_DIAG_Y_TERM(1) + X_DIAG_Y_TERM(2) +
+              X_DIAG_Y_TERM(3) + X_DIAG_Y_TERM(4) + X_DIAG_Y_TERM(5));
+      break;
+    case 7:
+      ret += (X_DIAG_Y_TERM(0) + X_DIAG_Y_TERM(1) + X_DIAG_Y_TERM(2) +
+              X_DIAG_Y_TERM(3) + X_DIAG_Y_TERM(4) + X_DIAG_Y_TERM(5) +
+              X_DIAG_Y_TERM(6));
+      break;
+    default:
+      break;
+  }
+
+  return ret;
+}
+
+template float sapien_xDiagy(const int N, const float* x, const float* diag,
+                             const float* y);
+template double sapien_xDiagy(const int N, const double* x,
+                              const double* diag, const double* y);
 }  // namespace internal
 }  // namespace sapien
 

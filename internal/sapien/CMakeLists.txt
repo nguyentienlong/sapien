@@ -16,6 +16,7 @@ set(SAPIEN_INTERNAL_SRC
   optimizer/line_search.cc
   optimizer/line_search_algorithm.cc
   optimizer/line_search_minimizer.cc
+  optimizer/trust_region_minimizer.cc
   
   # sgd
   sgd/loss.cc

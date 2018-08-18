@@ -13,3 +13,6 @@ target_link_libraries(sgd_regressor sapien)
 
 add_executable(line_search_minimizer line_search_minimizer.cc)
 target_link_libraries(line_search_minimizer sapien)
+
+add_executable(trust_region_minimizer trust_region_minimizer.cc)
+target_link_libraries(trust_region_minimizer sapien)

@@ -90,6 +90,12 @@ bool sapien_allfinite(const int N, const T* X);
 // Return the index of a maximun element in an array
 template<typename T>
 int sapien_imax(const int N, const T* X);
+
+// Compute x^T * Diag * y, in which
+//
+//  x, y are two n-dimensional vectors, Diag is n by n diagonal matrix.
+template<typename T>
+T sapien_xDiagy(const int n, const T* x, const T* diag, const T* y);
 }  // namespace internal
 }  // namespace sapien
 #endif  // INCLUDE_SAPIEN_INTERNAL_SAPIEN_MATH_H_

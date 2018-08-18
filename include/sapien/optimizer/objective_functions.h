@@ -42,8 +42,8 @@ class SAPIEN_EXPORT SecondOrderFunction : public FirstOrderFunction {
   // stores the result in result.
   virtual void HessianDot(const double* x, double* result) const = 0;
 
-  // Computes the Hessian matrix.
-  virtual void Hessian(double* hessian_matrix) const = 0;
+  // Return the diagonal of the Hessian matrix at current point x.
+  virtual void HessianDiag(const double* x, double* hessian_diag) const = 0;
 };
 }  // namespace sapien
 #endif  // INCLUDE_SAPIEN_OPTIMIZER_OBJECTIVE_FUNCTIONS_H_
