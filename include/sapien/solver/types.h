@@ -43,15 +43,44 @@ class SAPIEN_EXPORT SecondOrderFunction : public FirstOrderFunction {
   virtual void HessianDot(const double* x, double* result) const = 0;
 };
 
-enum LineSearchType {
-  ARMIJO,
-  WOLFE
+enum LineSearchDirectionType {
+  // Search direction is the negative of gradient, i.e
+  //
+  //  p_k = -f'(x_k)
+  STEEPEST_DESCENT,
+
+  // Search direction is initialized to the gradient at the starting point,
+  // i.e:
+  //
+  //  p_0 = -f'(x_0)
+  //
+  // Subsequently, it is updated as follows:
+  //
+  //  p_k = -f'(x_k) + beta * p_{k-1}
+  //
+  // in which beta is the Polak-Ribiere parameter and is computed as:
+  //
+  //         f'(x_k) . [f'(x_k) - f'(x_{k-1})]
+  //  beta = ---------------------------------
+  //               |f'(x_{k-1})|^2
+  NONLINEAR_CONJUGATE_GRADIENT,
+
+  // Search direction at iteration k is:
+  //
+  //  p_k = -H_k . f'(x_k)
+  //
+  // in which H_k is the inverse Hessian (f''(x_k)) approximation and
+  // is updated using the limited memory BFGS formula
+  // See Jorge Nocedal, Stephen J. Wright Numerical Optimization (2rd edition)
+  LBFGS
 };
 
-enum LineSearchDirectionType {
-  STEEPEST_DESCENT,
-  NONLINEAR_CONJUGATE_GRADIENT,
-  LBFGS
+enum LineSearchType {
+  // Armijo line search,
+  ARMIJO,
+
+  // Strong Wolfe line search
+  WOLFE
 };
 
 }  // namespace sapien
