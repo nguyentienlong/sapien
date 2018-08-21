@@ -48,8 +48,7 @@ class LineSearchAlgorithm {
 // Steepest descent
 class SteepestDescent : public LineSearchAlgorithm {
  public:
-  explicit SteepestDescent(const LineSearchMinimizer::Options&
-                           options);
+  explicit SteepestDescent(const LineSearchMinimizer::Options& options);
 
  private:
   virtual void DoMinimize(const FirstOrderFunction& obj_function,

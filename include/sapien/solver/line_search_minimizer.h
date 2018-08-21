@@ -86,6 +86,27 @@ class SAPIEN_EXPORT LineSearchMinimizer {
     LineSearchDirectionType line_search_direction_type =
         NONLINEAR_CONJUGATE_GRADIENT;
 
+    // Preconditioner for preconditioned nonlinear conjugate gradient descent
+    // By default it is set to nullptr meaning that the (unconditioned)
+    // nonlinear conjugate gradient descent will be used (not recommended)
+    //
+    // To get the most out of nonlinear conjugate gradients method, it is
+    // recommended that the matrix should be conditioned, i.e to find
+    // a symmetric, positive-definite 'matrix' M such that:
+    //
+    //  - M is a good approximation for f''(x).
+    //
+    //  - M` (inverse of matrix M) is easy to compute or it is easy
+    //    to solve this linear equation: Mx = b.
+    //
+    // Most commonly used preconditioners are:
+    //
+    //  - Jacobi: M = Diag(f''(x_k))
+    //
+    //  - M is the result of oncomplete Cholesky factorization of
+    //    matrix f''(x_k).
+    Preconditioner* preconditioner = nullptr;
+
     // LineSearchMinimizer terminates if:
     //
     //  |current_residual| <= tolerance * |initial_residual|

@@ -83,6 +83,22 @@ enum LineSearchType {
   WOLFE
 };
 
+// Interface for precoditioner
+class SAPIEN_EXPORT Preconditioner {
+  // No matter what preconditioner type we choose (e.g. Jacobi,
+  // incomplete Cholesky ..), the first one thing that we need to be able to
+  // do quicky is to compute the dot product between preconditioner
+  // and a vector, i.e to solve this linear system as quickly as possible:
+  //
+  //  M.x = b <=> x = M`.b
+  virtual void InverseDot(const size_t n, const double* b,
+                          double* result) const;
+
+  // And the second thing is to update the preconditioner at a given point
+  // x. Since this method might potentially change the internal data, it
+  // cannot be const!
+  virtual void Update(const size_t n, const double* x);
+};
 }  // namespace sapien
 #endif  // INCLUDE_SAPIEN_SOLVER_TYPES_H_
 
