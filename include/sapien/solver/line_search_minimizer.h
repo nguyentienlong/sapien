@@ -94,7 +94,7 @@ class SAPIEN_EXPORT LineSearchMinimizer {
     // recommended that the matrix should be conditioned, i.e to find
     // a symmetric, positive-definite 'matrix' M such that:
     //
-    //  - M is a good approximation for f''(x).
+    //  - M is a good approximation for Hessian matrix f''(x).
     //
     //  - M` (inverse of matrix M) is easy to compute or it is easy
     //    to solve this linear equation: Mx = b.
@@ -103,7 +103,7 @@ class SAPIEN_EXPORT LineSearchMinimizer {
     //
     //  - Jacobi: M = Diag(f''(x_k))
     //
-    //  - M is the result of oncomplete Cholesky factorization of
+    //  - M is the result of incomplete Cholesky factorization of Hessian
     //    matrix f''(x_k).
     Preconditioner* preconditioner = nullptr;
 
