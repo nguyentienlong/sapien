@@ -103,13 +103,13 @@
 // [1] - https://www.csie.ntu.edu.tw/~cjlin/papers/logistic.pdf
 // [2] - https://github.com/cjlin1/liblinear
 
-#ifndef INCLUDE_SAPIEN_OPTIMIZER_TRUST_REGION_MINIMIZER_H_
-#define INCLUDE_SAPIEN_OPTIMIZER_TRUST_REGION_MINIMIZER_H_
+#ifndef INCLUDE_SAPIEN_SOLVER_TRUST_REGION_MINIMIZER_H_
+#define INCLUDE_SAPIEN_SOLVER_TRUST_REGION_MINIMIZER_H_
 
 #include <cstddef>
 
 #include "sapien/internal/port.h"
-#include "sapien/optimizer/objective_functions.h"
+#include "sapien/solver/objective_functions.h"
 
 namespace sapien {
 
@@ -175,5 +175,5 @@ class SAPIEN_EXPORT TrustRegionMinimizer {
                        bool* reach_trust_region_boundary) const;
 };
 }  // namespace sapien
-#endif  // INCLUDE_SAPIEN_OPTIMIZER_TRUST_REGION_MINIMIZER_H_
+#endif  // INCLUDE_SAPIEN_SOLVER_TRUST_REGION_MINIMIZER_H_
 

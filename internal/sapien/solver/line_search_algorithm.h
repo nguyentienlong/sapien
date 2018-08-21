@@ -4,11 +4,11 @@
 //
 // Interface for all kinds of line search algorithms
 
-#ifndef INTERNAL_SAPIEN_OPTIMIZER_LINE_SEARCH_ALGORITHM_H_
-#define INTERNAL_SAPIEN_OPTIMIZER_LINE_SEARCH_ALGORITHM_H_
+#ifndef INTERNAL_SAPIEN_SOLVER_LINE_SEARCH_ALGORITHM_H_
+#define INTERNAL_SAPIEN_SOLVER_LINE_SEARCH_ALGORITHM_H_
 
-#include "sapien/optimizer/line_search_minimizer.h"
-#include "sapien/optimizer/line_search.h"
+#include "sapien/solver/line_search_minimizer.h"
+#include "sapien/solver/line_search.h"
 
 namespace sapien {
 namespace internal {
@@ -69,4 +69,4 @@ class NonlinearConjugateGradient : public LineSearchAlgorithm {
 
 }  // namespace internal
 }  // namespace sapien
-#endif  // INTERNAL_SAPIEN_OPTIMIZER_LINE_SEARCH_ALGORITHM_H_
+#endif  // INTERNAL_SAPIEN_SOLVER_LINE_SEARCH_ALGORITHM_H_

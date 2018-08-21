@@ -12,11 +12,11 @@ set(SAPIEN_INTERNAL_SRC
   utility/stringprintf.cc
   utility/wall_time.cc
 
-  # optimizer
-  optimizer/line_search.cc
-  optimizer/line_search_algorithm.cc
-  optimizer/line_search_minimizer.cc
-  optimizer/trust_region_minimizer.cc
+  # solver
+  solver/line_search.cc
+  solver/line_search_algorithm.cc
+  solver/line_search_minimizer.cc
+  solver/trust_region_minimizer.cc
   
   # sgd
   sgd/loss.cc
@@ -34,7 +34,7 @@ set(SAPIEN_INTERNAL_SRC
 set(SAPIEN_INTERNAL_HDRS  "")
 file(GLOB SAPIEN_INTERNAL_HDRS
   utility/*.h
-  optimizer/*.h
+  solver/*.h
   sgd/*.h
 )
 

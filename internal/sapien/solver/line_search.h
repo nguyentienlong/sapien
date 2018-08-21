@@ -4,13 +4,13 @@
 //
 // Interface for Armijo and Wolfe line search algorithms.
 
-#ifndef INTERNAL_SAPIEN_OPTIMIZER_LINE_SEARCH_H_
-#define INTERNAL_SAPIEN_OPTIMIZER_LINE_SEARCH_H_
+#ifndef INTERNAL_SAPIEN_SOLVER_LINE_SEARCH_H_
+#define INTERNAL_SAPIEN_SOLVER_LINE_SEARCH_H_
 
 #include <memory>
 #include <string>
 
-#include "sapien/optimizer/line_search_minimizer.h"
+#include "sapien/solver/line_search_minimizer.h"
 
 namespace sapien {
 namespace internal {
@@ -343,4 +343,4 @@ double ContractStep(const double step_size,
                     const double hi);
 }  // namespace internal
 }  // namespace sapien
-#endif  // INTERNAL_SAPIEN_OPTIMIZER_LINE_SEARCH_H_
+#endif  // INTERNAL_SAPIEN_SOLVER_LINE_SEARCH_H_

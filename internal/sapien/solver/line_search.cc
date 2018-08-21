@@ -5,7 +5,7 @@
 #include <cmath>
 #include <memory>  // unique_ptr
 
-#include "sapien/optimizer/line_search.h"
+#include "sapien/solver/line_search.h"
 #include "sapien/internal/sapien_math.h"
 #include "sapien/utility/wall_time.h"
 #include "glog/logging.h"

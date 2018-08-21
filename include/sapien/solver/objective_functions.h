@@ -4,8 +4,8 @@
 //
 // Interface for various kinds of objective functions
 
-#ifndef INCLUDE_SAPIEN_OPTIMIZER_OBJECTIVE_FUNCTIONS_H_
-#define INCLUDE_SAPIEN_OPTIMIZER_OBJECTIVE_FUNCTIONS_H_
+#ifndef INCLUDE_SAPIEN_SOLVER_OBJECTIVE_FUNCTIONS_H_
+#define INCLUDE_SAPIEN_SOLVER_OBJECTIVE_FUNCTIONS_H_
 
 #include "sapien/internal/port.h"
 
@@ -46,5 +46,5 @@ class SAPIEN_EXPORT SecondOrderFunction : public FirstOrderFunction {
   virtual void HessianDiag(const double* x, double* hessian_diag) const = 0;
 };
 }  // namespace sapien
-#endif  // INCLUDE_SAPIEN_OPTIMIZER_OBJECTIVE_FUNCTIONS_H_
+#endif  // INCLUDE_SAPIEN_SOLVER_OBJECTIVE_FUNCTIONS_H_
 

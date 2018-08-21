@@ -4,7 +4,7 @@
 
 #include <memory>
 
-#include "sapien/optimizer/line_search_algorithm.h"
+#include "sapien/solver/line_search_algorithm.h"
 #include "sapien/internal/sapien_math.h"
 #include "glog/logging.h"
 

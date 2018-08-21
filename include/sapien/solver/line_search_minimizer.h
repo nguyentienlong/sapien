@@ -66,13 +66,13 @@
 // delete rosen;
 
 
-#ifndef INCLUDE_SAPIEN_OPTIMIZER_LINE_SEARCH_MINIMIZER_H_
-#define INCLUDE_SAPIEN_OPTIMIZER_LINE_SEARCH_MINIMIZER_H_
+#ifndef INCLUDE_SAPIEN_SOLVER_LINE_SEARCH_MINIMIZER_H_
+#define INCLUDE_SAPIEN_SOLVER_LINE_SEARCH_MINIMIZER_H_
 
 #include <cstddef>
 
 #include "sapien/internal/port.h"
-#include "sapien/optimizer/objective_functions.h"
+#include "sapien/solver/objective_functions.h"
 
 namespace sapien {
 
@@ -254,4 +254,4 @@ class SAPIEN_EXPORT LineSearchMinimizer {
   Options options_;
 };
 }  // namespace sapien
-#endif  // INCLUDE_SAPIEN_OPTIMIZER_LINE_SEARCH_MINIMIZER_H_
+#endif  // INCLUDE_SAPIEN_SOLVER_LINE_SEARCH_MINIMIZER_H_

@@ -1,7 +1,7 @@
 // Copyright 2018
 
-#include "sapien/optimizer/line_search_minimizer.h"
-#include "sapien/optimizer/line_search_algorithm.h"
+#include "sapien/solver/line_search_minimizer.h"
+#include "sapien/solver/line_search_algorithm.h"
 
 namespace sapien {
 

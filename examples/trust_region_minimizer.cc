@@ -7,7 +7,7 @@
 //
 //  f(x1, x2) = 100(x2 - x1^2)^2 + (x1 - 1)^2
 
-#include "sapien/optimizer/trust_region_minimizer.h"
+#include "sapien/solver/trust_region_minimizer.h"
 #include "glog/logging.h"
 
 using sapien::SecondOrderFunction;

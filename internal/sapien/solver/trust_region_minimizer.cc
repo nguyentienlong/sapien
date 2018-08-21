@@ -6,7 +6,7 @@
 #include <cstring>
 #include <memory>
 
-#include "sapien/optimizer/trust_region_minimizer.h"
+#include "sapien/solver/trust_region_minimizer.h"
 #include "sapien/internal/sapien_math.h"
 #include "glog/logging.h"
 
