@@ -36,7 +36,7 @@ void TrustRegionMinimizer::Minimize(const SecondOrderFunction* obj_function,
 
   // Init gradient
   std::unique_ptr<double[]> gradient(new double[n]);
-  obj_function->Gradient(gradient.get(), solution);
+  obj_function->Gradient(solution, gradient.get());
   double gradient_norm2 = sapien_dot(n, gradient.get(), gradient.get());
 
   // Keep track of values of obj_function
@@ -219,7 +219,7 @@ void TrustRegionMinimizer::Minimize(const SecondOrderFunction* obj_function,
       ++iter;
       std::memcpy(solution, new_solution.get(), n * sizeof(double));
       function_value = new_function_value;
-      obj_function->Gradient(gradient.get(), solution);
+      obj_function->Gradient(solution, gradient.get());
       gradient_norm2 = sapien_dot(n, gradient.get(), gradient.get());
     }
 

@@ -72,21 +72,9 @@
 #include <cstddef>
 
 #include "sapien/internal/port.h"
-#include "sapien/solver/objective_functions.h"
+#include "sapien/solver/types.h"
 
 namespace sapien {
-
-enum LineSearchType {
-  ARMIJO,
-  WOLFE
-};
-
-enum LineSearchDirectionType {
-  STEEPEST_DESCENT,
-  NONLINEAR_CONJUGATE_GRADIENT,
-  LBFGS
-};
-
 
 // One way to estimate the global minimizer of a continuously differentiable
 // Lipschitz function f is to use iterative method, i.e method that, starting

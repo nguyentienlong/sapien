@@ -10,7 +10,7 @@
 #include <memory>
 #include <string>
 
-#include "sapien/solver/line_search_minimizer.h"
+#include "sapien/solver/types.h"
 
 namespace sapien {
 namespace internal {

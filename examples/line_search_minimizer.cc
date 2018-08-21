@@ -32,7 +32,7 @@ struct Rosenbrock : public FirstOrderFunction {
   }
 
   // Evaluate the gradient at the given point x.
-  void Gradient(double* gradient, const double* x) const {
+  void Gradient(const double* x, double* gradient) const {
     const double x1 = x[0];
     const double x2 = x[1];
     const double tmp = x2 - x1 * x1;

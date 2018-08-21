@@ -109,7 +109,7 @@
 #include <cstddef>
 
 #include "sapien/internal/port.h"
-#include "sapien/solver/objective_functions.h"
+#include "sapien/solver/types.h"
 
 namespace sapien {
 

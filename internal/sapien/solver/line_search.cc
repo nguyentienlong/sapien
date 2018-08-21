@@ -41,7 +41,7 @@ PhiFunction::PhiFunction(const FirstOrderFunction* func,
   // Current gradient of func_.
   current_func_gradient_ =
       std::unique_ptr<double[]>(new double[func->n_variables()]);
-  func->Gradient(current_func_gradient_.get(), position);
+  func->Gradient(position, current_func_gradient_.get());
 
   // The derivative of Phi at step_size = 0.0
   const_cast<double&>(gradient0) = direction_scale *
@@ -74,7 +74,7 @@ double PhiFunction::Derivative(const double step_size) {
   current_step_size_ = step_size;
 
   // Evaluate the gradient of func_ at the current_position_
-  func_->Gradient(current_func_gradient_.get(), current_position_.get());
+  func_->Gradient(current_position_.get(), current_func_gradient_.get());
 
   // Then the derivative of Phi at step_size is simply the dot product
   // of current_func_gradient_ and direction_

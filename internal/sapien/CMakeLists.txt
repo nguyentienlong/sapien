@@ -16,7 +16,7 @@ set(SAPIEN_INTERNAL_SRC
   solver/line_search.cc
   solver/line_search_algorithm.cc
   solver/line_search_minimizer.cc
-  solver/trust_region_minimizer.cc
+  # solver/trust_region_minimizer.cc
   
   # sgd
   sgd/loss.cc
