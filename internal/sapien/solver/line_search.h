@@ -73,8 +73,8 @@ class LineSearch {
     //
     // Note that:
     //  0 < max_step_contraction < min_step_contraction < 1
-    double max_step_contraction = 0.1;  // 1e-3;
-    double min_step_contraction = 0.5;  // 0.9;
+    double max_step_contraction = 1e-3;
+    double min_step_contraction = 0.9;
 
     // If during the line search, the step_size falls below this value,
     // it is set to this value and the line search terminates.
@@ -87,15 +87,12 @@ class LineSearch {
 
     // Wolfe-specific line search parameters.
 
-    // The Wolfe conditions consist of the Armijo sufficient decrease
+    // The strong Wolfe conditions consist of the Armijo sufficient decrease
     // condition, and an additional requirement that the step_size be chosen
     // s.t:
     //
-    //  phi_function'(step_size) >= sufficient_curvature_decrease *
-    //                              phi_function'(0)
-    //
-    // Note that: We only implement the Wolfe conditions NOT the strong
-    // Wolfe conditions.
+    //  |phi_function'(step_size)| <= sufficient_curvature_decrease *
+    //                              |phi_function'(0)|
     double sufficient_curvature_decrease = 0.9;
 
     // The Wolfe line search algorithm is similar to that of the Armijo

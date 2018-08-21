@@ -264,10 +264,11 @@ double WolfeLineSearch::Search(const FirstOrderFunction* func,
   PhiFunction phi_function(func, position, direction, direction_scale);
 
   const double sufficient_curvature =
-      options().sufficient_curvature_decrease * phi_function.gradient0;
+      options().sufficient_curvature_decrease *
+      std::fabs(phi_function.gradient0);
   double phi_gradient = phi_function.Derivative(armijo_step_size);
 
-  if (phi_gradient >= sufficient_curvature) {
+  if (std::fabs(phi_gradient) <= sufficient_curvature) {
     if (summary != nullptr) {
       summary->search_failed = false;
       summary->total_time_elapsed = WallTimeInSeconds() - start;
@@ -312,7 +313,7 @@ double WolfeLineSearch::Search(const FirstOrderFunction* func,
 
     phi_gradient = phi_function.Derivative(current_step_size);
 
-    if (phi_gradient >= sufficient_curvature) {
+    if (std::fabs(phi_gradient) <= sufficient_curvature) {
       // Found Wolfe point.
       if (summary != nullptr) {
         summary->search_failed = false;
@@ -348,7 +349,8 @@ double WolfeLineSearch::Refine(PhiFunction* phi_function,
   double delta_step_size;
 
   const double sufficient_curvature =
-      options().sufficient_curvature_decrease * phi_function->gradient0;
+      options().sufficient_curvature_decrease *
+      std::fabs(phi_function->gradient0);
   double sufficient_decrease;
 
   while (delta > options().epsilon) {
@@ -372,7 +374,7 @@ double WolfeLineSearch::Refine(PhiFunction* phi_function,
     if (current_phi <= sufficient_decrease) {
       phi_gradient = phi_function->Derivative(current_step_size);
 
-      if (phi_gradient >= sufficient_curvature) {
+      if (std::fabs(phi_gradient) <= sufficient_curvature) {
         // Found Wolfe point
         if (summary != nullptr) {
           summary->search_failed = false;

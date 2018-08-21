@@ -111,7 +111,7 @@ class SAPIEN_EXPORT LineSearchMinimizer {
   struct SAPIEN_EXPORT Options {
     // Line search type to compute step_size at each iteration
     // By default Armijo line search will be used.
-    LineSearchType line_search_type = ARMIJO;
+    LineSearchType line_search_type = WOLFE;
 
     // By default Polack and Ribie're Nonlinear conjugate gradient
     // will be used
@@ -162,8 +162,8 @@ class SAPIEN_EXPORT LineSearchMinimizer {
     //
     // Note that:
     //  0 < max_step_contraction < min_step_contraction < 1
-    double max_step_contraction = 0.1;  // 1e-3;
-    double min_step_contraction = 0.5;  // 0.9;
+    double max_step_contraction = 1e-3;
+    double min_step_contraction = 0.9;
 
     // If during the line search, the step_size falls below this value,
     // it is set to this value and the line search terminates.
