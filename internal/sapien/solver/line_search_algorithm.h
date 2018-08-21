@@ -30,7 +30,7 @@ class LineSearchAlgorithm {
 
   // Estimiate the global minimizer of an  obj_function of type
   // FirstOrderFunction and stores the result in solution.
-  void Minimize(const FirstOrderFunction* obj_function,
+  void Minimize(const FirstOrderFunction& obj_function,
                 double* solution) const;
 
  protected:
@@ -39,7 +39,7 @@ class LineSearchAlgorithm {
 
  private:
   const LineSearchMinimizer::Options& options_;
-  virtual void DoMinimize(const FirstOrderFunction* obj_function,
+  virtual void DoMinimize(const FirstOrderFunction& obj_function,
                           double* solution) const = 0;
 };
 
@@ -52,7 +52,7 @@ class SteepestDescent : public LineSearchAlgorithm {
                            options);
 
  private:
-  virtual void DoMinimize(const FirstOrderFunction* obj_function,
+  virtual void DoMinimize(const FirstOrderFunction& obj_function,
                           double* solution) const;
 };
 
@@ -63,7 +63,7 @@ class NonlinearConjugateGradient : public LineSearchAlgorithm {
                                       options);
 
  private:
-  virtual void DoMinimize(const FirstOrderFunction* obj_function,
+  virtual void DoMinimize(const FirstOrderFunction& obj_function,
                           double* solution) const;
 };
 

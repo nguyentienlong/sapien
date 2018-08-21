@@ -233,7 +233,7 @@ class SAPIEN_EXPORT LineSearchMinimizer {
   LineSearchMinimizer() : options_(Options()) {}
   explicit LineSearchMinimizer(const Options& options) : options_(options) {}
 
-  void Minimize(const FirstOrderFunction* obj_function, double* solution);
+  void Minimize(const FirstOrderFunction& obj_function, double* solution);
 
  protected:
   const Options& options() const { return options_; }

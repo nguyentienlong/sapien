@@ -20,7 +20,7 @@ LineSearch::LineSearch(const LineSearch::Options& options)
 
 // Phi function ----------------------------------------------------------
 
-PhiFunction::PhiFunction(const FirstOrderFunction* func,
+PhiFunction::PhiFunction(const FirstOrderFunction& func,
                          const double* position,
                          const double* direction,
                          const double direction_scale)
@@ -28,24 +28,24 @@ PhiFunction::PhiFunction(const FirstOrderFunction* func,
       direction_scale_(direction_scale),
       direction_(direction),
       current_step_size_(0.0),
-      phi0((*func)(position)),
+      phi0(func(position)),
       gradient0(0.0) {
   // Current position. We need to keep tract of this value as well as
   // current step size in order to quickly compute the value and
   // the derivative of phi at a given step_size
   current_position_ =
-      std::unique_ptr<double[]>(new double[func->n_variables()]);
+      std::unique_ptr<double[]>(new double[func.n_variables()]);
   std::memcpy(current_position_.get(), position,
-              func->n_variables() * sizeof(double));
+              func.n_variables() * sizeof(double));
 
   // Current gradient of func_.
   current_func_gradient_ =
-      std::unique_ptr<double[]>(new double[func->n_variables()]);
-  func->Gradient(position, current_func_gradient_.get());
+      std::unique_ptr<double[]>(new double[func.n_variables()]);
+  func.Gradient(position, current_func_gradient_.get());
 
   // The derivative of Phi at step_size = 0.0
   const_cast<double&>(gradient0) = direction_scale *
-      sapien_dot(func->n_variables(), current_func_gradient_.get(),
+      sapien_dot(func.n_variables(), current_func_gradient_.get(),
                  direction);
 }
 
@@ -53,19 +53,19 @@ PhiFunction::PhiFunction(const FirstOrderFunction* func,
 // This method updates current_step_size_ and current_positon_
 double PhiFunction::operator()(const double step_size) {
   // Update the current_position_
-  sapien_axpy(func_->n_variables(),
+  sapien_axpy(func_.n_variables(),
               direction_scale_ * (step_size - current_step_size_),
               direction_,
               current_position_.get());
   current_step_size_ = step_size;
-  return (*func_)(current_position_.get());
+  return func_(current_position_.get());
 }
 
 // Returns the derivative of Phi at step_size.
 // This methods update current_step_size_ and current_position_
 double PhiFunction::Derivative(const double step_size) {
   // Update the current_position_
-  sapien_axpy(func_->n_variables(),
+  sapien_axpy(func_.n_variables(),
               direction_scale_ * (step_size - current_step_size_),
               direction_,
               current_position_.get());
@@ -74,11 +74,11 @@ double PhiFunction::Derivative(const double step_size) {
   current_step_size_ = step_size;
 
   // Evaluate the gradient of func_ at the current_position_
-  func_->Gradient(current_position_.get(), current_func_gradient_.get());
+  func_.Gradient(current_position_.get(), current_func_gradient_.get());
 
   // Then the derivative of Phi at step_size is simply the dot product
   // of current_func_gradient_ and direction_
-  return direction_scale_ * sapien_dot(func_->n_variables(),
+  return direction_scale_ * sapien_dot(func_.n_variables(),
                                        current_func_gradient_.get(),
                                        direction_);
 }
@@ -89,7 +89,7 @@ ArmijoLineSearch::ArmijoLineSearch() : LineSearch() {}
 ArmijoLineSearch::ArmijoLineSearch(const LineSearch::Options& options)
     : LineSearch(options) {}
 
-double ArmijoLineSearch::Search(const FirstOrderFunction* func,
+double ArmijoLineSearch::Search(const FirstOrderFunction& func,
                                 const double* position,
                                 const double* direction,
                                 const double direction_scale,
@@ -105,7 +105,6 @@ double ArmijoLineSearch::Search(const FirstOrderFunction* func,
   }
 
   // CHECK parameters
-  CHECK_NOTNULL(func);
   CHECK_NOTNULL(position);
   CHECK_NOTNULL(direction);
 
@@ -197,7 +196,7 @@ WolfeLineSearch::WolfeLineSearch() : LineSearch() {}
 WolfeLineSearch::WolfeLineSearch(const LineSearch::Options& options)
     : LineSearch(options) {}
 
-double WolfeLineSearch::Search(const FirstOrderFunction* func,
+double WolfeLineSearch::Search(const FirstOrderFunction& func,
                                const double* position,
                                const double* direction,
                                const double direction_scale,
@@ -213,7 +212,6 @@ double WolfeLineSearch::Search(const FirstOrderFunction* func,
   }
 
   // CHECK parameters
-  CHECK_NOTNULL(func);
   CHECK_NOTNULL(position);
   CHECK_NOTNULL(direction);
 

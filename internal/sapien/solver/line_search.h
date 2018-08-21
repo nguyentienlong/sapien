@@ -169,7 +169,7 @@ class LineSearch {
   //
   // Note that, it is the caller's resposibility to make sure that the size
   // of position as well as direction is the same as func->n_variables().
-  virtual double Search(const FirstOrderFunction* func,
+  virtual double Search(const FirstOrderFunction& func,
                         const double* position,
                         const double* direction,
                         const double direction_scale = 1.0,
@@ -202,7 +202,7 @@ class PhiFunction {
   //
   // Note that, it is caller's responsibility to make sure that the size of
   // position as well as direction is the same as func->n_variables()
-  explicit PhiFunction(const FirstOrderFunction* func,
+  explicit PhiFunction(const FirstOrderFunction& func,
                        const double* position,
                        const double* direction,
                        const double direction_scale = 1.0);
@@ -222,7 +222,7 @@ class PhiFunction {
   double Derivative(const double step_size);
 
  private:
-  const FirstOrderFunction* func_;
+  const FirstOrderFunction& func_;
   const double* direction_;
   double direction_scale_;
 
@@ -259,7 +259,7 @@ class ArmijoLineSearch : public LineSearch {
   //
   // Note that, it is the caller's resposibility to make sure that the size
   // of position as well as direction is the same as func->n_variables().
-  virtual double Search(const FirstOrderFunction* func,
+  virtual double Search(const FirstOrderFunction& func,
                         const double* position,
                         const double* direction,
                         const double direction_scale = 1.0,
@@ -279,7 +279,7 @@ class WolfeLineSearch : public LineSearch {
   //
   // Note that, it's the caller's responsility to make sure thar the size
   // of position as well as direction is the same as func->n_variables().
-  virtual double Search(const FirstOrderFunction* func,
+  virtual double Search(const FirstOrderFunction& func,
                         const double* position,
                         const double* direction,
                         const double direction_scale = 1.0,

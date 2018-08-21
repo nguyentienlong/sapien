@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
   options.max_num_iterations = 500;
   LineSearchMinimizer m2(options);
 
-  Rosenbrock* rosen = new Rosenbrock();
+  Rosenbrock rosen;
   double m1_result[2] = {0.0, 0.0};
   double m2_result[2] = {0.0, 0.0};
 
@@ -70,5 +70,6 @@ int main(int argc, char** argv) {
             << m1_result[1] << "]";
   LOG(INFO) << "Steepest descent result: x = [" << m2_result[0] << ", "
             << m2_result[1] << "]";
+
   return 0;
 }
