@@ -2,31 +2,30 @@
 //
 // Author: mail2ngoclinh@gmail.com
 //
-// LineSearchMinimizer minimizes a continuously differentiable Lipschitz
-// function f using the following paradigm:
+// LineSearchMinimizer solves the unconstrained problem
 //
-// Given input function f, a starting point x, a maximum number of
-// iterations max_iter, and a tollerance epsilon.
+//  min f(x) in which f : R^n -> R is (at least) a continuously
+//  differentiable Lipschitz function
+//
+// using the following scheme:
 //
 // 1. Setup:
+//    - Starting point x
+//    - Initialize a search direction search_direction
 //
-//    - iter <- 0
-//    - initial_gradient <- compute gradient of f at initial point x.
-//    - Initialize search_direction
+// 2. Repeat until some stopping criteria are met:
 //
-// 2. while iter < max_iter and |gradient| > epsilon * |initial_gradient|:
+//    - Use line search (ARMIJO or WOLFE) to compute the step size
+//      along the search_direction
 //
-//    - Compute a descent search_direction. Choices are: STEEPEST_DESCENT,
-//      NONLINEAR_CONJUGATE_GRADIENT, and LBFGS.
+//       step_size <- line_search(f, x, search_direction)
 //
-//    - Use line search (ARMIJO or WOLFE) to find a step_size
+//    - Update solution:
 //
-//    - Update:
-//      x <- x + step_size * search_direction
-//      iter <- iter + 1
-//      gradient <- f'(x)
-//      update search_direction based on STEEPEST_DESCENT,
-//      NONLINEAR_CONJUGATE_GRADIENT, or LBFGS
+//       x <- x + step_size * search_direction
+//
+//    - Update search_direction based on whether it is a STEEPEST_DESCENT,
+//      a NONLINEAR_CONJUGATE, or a LBFGS search direction
 //
 // Example: Estimating the global minimizer of Rosenbrock function:
 //
@@ -34,8 +33,8 @@
 //
 // This function has a unique global minimum at x = [1, 1]
 //
-// # Create Rosenbrock function by implementing the
-//   FirstOrderFunction interface
+// # Create Rosenbrock function by implementing the FirstOrderFunction
+//   interface
 //
 // struct Rosenbrock : public FirstOrderFunction {
 //  int n_variables() const { return 2; }
@@ -59,11 +58,10 @@
 //
 //
 // LineSearchMinimizer minimizer;
-// Rosenbrock rosen = new RosenBrock();
+// Rosenbrock rosen;
 //
 // double solution[2] = {0.0, 0.0};  // starting point
 // minimizer.Minimize(rosen, solution)
-// delete rosen;
 
 
 #ifndef INCLUDE_SAPIEN_SOLVER_LINE_SEARCH_MINIMIZER_H_
@@ -76,41 +74,11 @@
 
 namespace sapien {
 
-// One way to estimate the global minimizer of a continuously differentiable
-// Lipschitz function f is to use iterative method, i.e method that, starting
-// from a point x_0, build a sequence {x_k} such that f(x_(k+1)) <= f(x_k).
-//
-// The general iterative scheme is as follows:
-//
-// 1. Calculate a search direction p_k from current position x_k, and
-//    ensure that p_k is a descent direction, i.e: f'(x_k) * p_k < 0,
-//    whenever f'(x_k) != 0. (Note that the product f'(x_k) * p_k is
-//    the dot product of two vectors in multidimensional space).
-//
-// 2. Use line search to calculate a suitable step-size step_size > 0 so that
-//    f(x_k + step_size * p_k) < f(x_k).
-//
-// 3. Update th point: x_(k+1) = x_k + step_size * p_k.
-//
-// Step 2 above is equivalent to find step_size to minimize the function f
-// along the search direction p_k, i.e to estimate the minimizer of the
-// univariate function
-//
-//  phi(step_size) = f(x_k + step_size * p_k) (step_size > 0).
-//
-// Note that, by chain rule we have:
-//
-//  phi'(step_size) = f'(x_k + step_size * p_k) * p_k
-//
-// While finding the exact minimum of this function is hard, expensive,
-// and sometimes unnecessary, in practice we often use some iterative
-// algorithms to approximate this minimizer, most well-known algorithms
-// are: Armijo and Wolfe.
 class SAPIEN_EXPORT LineSearchMinimizer {
  public:
   struct SAPIEN_EXPORT Options {
     // Line search type to compute step_size at each iteration
-    // By default Armijo line search will be used.
+    // By default strong Wolfe line search will be used.
     LineSearchType line_search_type = WOLFE;
 
     // By default Polack and Ribie're Nonlinear conjugate gradient
@@ -120,7 +88,7 @@ class SAPIEN_EXPORT LineSearchMinimizer {
 
     // LineSearchMinimizer terminates if:
     //
-    //  |current_gradient| <= tolerance * |initial_gradient|
+    //  |current_residual| <= tolerance * |initial_residual|
     double tolerance = 1e-4;
 
     // LineSearchMinimizer minimizes an objective function f by generating
@@ -230,9 +198,15 @@ class SAPIEN_EXPORT LineSearchMinimizer {
     double min_step_size_search_interval_length = 1e-3;
   };
 
+  // Construct a LineSearchMinimizer object using default options
   LineSearchMinimizer() : options_(Options()) {}
+
+  // Construct a LineSearchMinimizer object using custom options
   explicit LineSearchMinimizer(const Options& options) : options_(options) {}
 
+  // Given an objective function of type FirstOrderFunction, tries to
+  // estimiate its the global minimizer, and stores the result in
+  // solution
   void Minimize(const FirstOrderFunction& obj_function, double* solution);
 
  protected:
