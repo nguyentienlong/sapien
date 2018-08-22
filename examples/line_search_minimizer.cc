@@ -6,12 +6,15 @@
 // Rosenbrock function
 //
 //  f(x1, x2) = 100(x2 - x1^2)^2 + (x1 - 1)^2
+#include <cstring>
 
+#include "sapien/solver/types.h"
 #include "sapien/solver/line_search_minimizer.h"
 #include "glog/logging.h"
 
 using sapien::FirstOrderFunction;
 using sapien::LineSearchMinimizer;
+using sapien::Preconditioner;
 
 // Rosenbrock function
 //
@@ -42,6 +45,18 @@ struct Rosenbrock : public FirstOrderFunction {
   }
 };
 
+// A trivial identity preconditioner
+struct IdentityPreconditioner : public Preconditioner {
+  // Mx = b => x = M`b = b
+  void InverseDot(const size_t n, const double* b, double* x) const {
+    std::memcpy(x, b, n * sizeof(double));
+  }
+
+  // Update preconditioner: does nothing!
+  void Update(const size_t n, const double* x) {
+  }
+};
+
 int main(int argc, char** argv) {
   google::InitGoogleLogging(argv[0]);
   FLAGS_logtostderr = 1;
@@ -53,9 +68,10 @@ int main(int argc, char** argv) {
   // Custom minimizer using steepest descent.
   // Using steepst descent to estimate the global minimizer of Rosenbrock
   // function is probably the worst decision you'll ever make in your life!
+  Preconditioner* M = new IdentityPreconditioner();
   LineSearchMinimizer::Options options;
-  options.line_search_direction_type = sapien::STEEPEST_DESCENT;
-  options.max_num_iterations = 500;
+  options.line_search_direction_type = sapien::NONLINEAR_CONJUGATE_GRADIENT;
+  options.preconditioner = M;
   LineSearchMinimizer m2(options);
 
   Rosenbrock rosen;
@@ -68,7 +84,7 @@ int main(int argc, char** argv) {
   LOG(INFO) << "True minimizer: x* = [1.0, 1.0]";
   LOG(INFO) << "Default result: x = [" << m1_result[0] << ", "
             << m1_result[1] << "]";
-  LOG(INFO) << "Steepest descent result: x = [" << m2_result[0] << ", "
+  LOG(INFO) << "Identity preconditioner: x = [" << m2_result[0] << ", "
             << m2_result[1] << "]";
 
   return 0;

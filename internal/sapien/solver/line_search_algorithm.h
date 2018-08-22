@@ -35,7 +35,7 @@ class LineSearchAlgorithm {
 
  protected:
   const LineSearchMinimizer::Options& options() const { return options_; }
-  std::shared_ptr<LineSearch> GetLineSearch() const;
+  LineSearch* GetLineSearch() const;
 
  private:
   const LineSearchMinimizer::Options& options_;
@@ -55,11 +55,21 @@ class SteepestDescent : public LineSearchAlgorithm {
                           double* solution) const;
 };
 
-// Polack and Ribie're nonlinear conjugate gradient
-class NonlinearConjugateGradient : public LineSearchAlgorithm {
+// Preconditioned nonlinear conjugate gradient with Polak-Ribiere parameter
+class PreconditionedCG : public LineSearchAlgorithm {
  public:
-  explicit NonlinearConjugateGradient(const LineSearchMinimizer::Options&
-                                      options);
+  explicit PreconditionedCG(const LineSearchMinimizer::Options& options);
+
+ private:
+  virtual void DoMinimize(const FirstOrderFunction& obj_function,
+                          double* solution) const;
+};
+
+// Line search with limited memory BFGS search direction
+// See Nocedal J., Wright S., Numerical Optimization, 2nd Ed, section 7.2
+class LimitedMemoryBFGS : public LineSearchAlgorithm {
+ public:
+  explicit LimitedMemoryBFGS(const LineSearchMinimizer::Options& options);
 
  private:
   virtual void DoMinimize(const FirstOrderFunction& obj_function,

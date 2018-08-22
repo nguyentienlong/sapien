@@ -85,6 +85,7 @@ enum LineSearchType {
 
 // Interface for precoditioner
 class SAPIEN_EXPORT Preconditioner {
+ public:
   // No matter what preconditioner type we choose (e.g. Jacobi,
   // incomplete Cholesky ..), the first one thing that we need to be able to
   // do quicky is to compute the dot product between preconditioner
@@ -92,12 +93,12 @@ class SAPIEN_EXPORT Preconditioner {
   //
   //  M.x = b <=> x = M`.b
   virtual void InverseDot(const size_t n, const double* b,
-                          double* result) const;
+                          double* result) const = 0;
 
   // And the second thing is to update the preconditioner at a given point
   // x. Since this method might potentially change the internal data, it
   // cannot be const!
-  virtual void Update(const size_t n, const double* x);
+  virtual void Update(const size_t n, const double* x) = 0;
 };
 }  // namespace sapien
 #endif  // INCLUDE_SAPIEN_SOLVER_TYPES_H_
