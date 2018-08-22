@@ -84,7 +84,7 @@ class SAPIEN_EXPORT LineSearchMinimizer {
     // By default Polack and Ribie're Nonlinear conjugate gradient
     // will be used
     LineSearchDirectionType line_search_direction_type =
-        NONLINEAR_CONJUGATE_GRADIENT;
+        POLAK_RIBIERE_CONJUGATE_GRADIENT;
 
     // Preconditioner for preconditioned nonlinear conjugate gradient descent
     // By default it is set to nullptr meaning that the (unconditioned)
@@ -123,7 +123,8 @@ class SAPIEN_EXPORT LineSearchMinimizer {
 
     // Armijo and Wolfe line search parameters.
 
-    // Initial step_size
+    // Initial step_size. It is recommeded that the initial trial should
+    // be unit step, i.e try step_size = 1.0 first and foremost.
     double initial_step_size = 1.0;
 
     // We want to find a step_size which results in sufficient decrease of
@@ -151,8 +152,8 @@ class SAPIEN_EXPORT LineSearchMinimizer {
     //
     // Note that:
     //  0 < max_step_contraction < min_step_contraction < 1
-    double max_step_contraction = 1e-3;
-    double min_step_contraction = 0.9;
+    double max_step_contraction = 0.1;  // 1e-3;
+    double min_step_contraction = 0.5;  // 0.9;
 
     // If during the line search, the step_size falls below this value,
     // it is set to this value and the line search terminates.

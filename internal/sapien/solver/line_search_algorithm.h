@@ -65,6 +65,16 @@ class PolakRibiereCG : public LineSearchAlgorithm {
                           double* solution) const;
 };
 
+// Preconditioned nonlinear conjugate gradients with Fletcher-Reeves parameter
+class FletcherReevesCG : public LineSearchAlgorithm {
+ public:
+  explicit FletcherReevesCG(const LineSearchMinimizer::Options& options);
+
+ private:
+  virtual void DoMinimize(const FirstOrderFunction& function,
+                          double* solution) const;
+};
+
 // Line search with limited memory BFGS search direction
 // See Nocedal J., Wright S., Numerical Optimization, 2nd Ed, section 7.2
 class LimitedMemoryBFGS : public LineSearchAlgorithm {

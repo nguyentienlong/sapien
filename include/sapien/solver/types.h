@@ -7,6 +7,8 @@
 #ifndef INCLUDE_SAPIEN_SOLVER_TYPES_H_
 #define INCLUDE_SAPIEN_SOLVER_TYPES_H_
 
+#include <cstddef>
+
 #include "sapien/internal/port.h"
 
 namespace sapien {
@@ -49,8 +51,24 @@ enum LineSearchDirectionType {
   //  p_k = -f'(x_k)
   STEEPEST_DESCENT,
 
-  // Search direction is initialized to the gradient at the starting point,
-  // i.e:
+  // Search direction is initialized to the negative of gradient at the
+  // starting point, i.e:
+  //
+  //  p_0 = -f'(x_0)
+  //
+  // Subsequently, it is updated as follows:
+  //
+  //  p_k = -f'(x_k) + beta * p_{k-1}
+  //
+  // in which beta is the Fletcher-Reeves parameter:
+  //
+  //          |f'(x_k)|^2     ----> Squares L2-norm of gradient at x_k
+  //  beta = ---------------
+  //         |f'(x_{k-1})|^2  ----> squares L2-norm of gradient at x_{k-1}
+  FLETCHER_REEVES_CONJUGATE_GRADIENT,
+
+  // Search direction is initialized to the negative of gradient at the
+  // starting point, i.e:
   //
   //  p_0 = -f'(x_0)
   //
@@ -63,7 +81,11 @@ enum LineSearchDirectionType {
   //         f'(x_k) . [f'(x_k) - f'(x_{k-1})]
   //  beta = ---------------------------------
   //               |f'(x_{k-1})|^2
-  NONLINEAR_CONJUGATE_GRADIENT,
+  //
+  // Even though there is not yet a sound convergence theory to support
+  // Polak-Ribiere conjugate gradients, it is the perferred method whenever
+  // it comes to nonlinear conjugate gradients.
+  POLAK_RIBIERE_CONJUGATE_GRADIENT,
 
   // Search direction at iteration k is:
   //

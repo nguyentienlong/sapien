@@ -11,8 +11,15 @@ target_link_libraries(sgd_mnist sapien)
 add_executable(sgd_regressor sgd_regressor.cc)
 target_link_libraries(sgd_regressor sapien)
 
+add_library(solver_test_problems
+  solver_test_problems.cc
+  solver_test_problems.h)
+target_include_directories(solver_test_problems
+  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(solver_test_problems sapien)
+
 add_executable(line_search_minimizer line_search_minimizer.cc)
-target_link_libraries(line_search_minimizer sapien)
+target_link_libraries(line_search_minimizer solver_test_problems)
 
 # add_executable(trust_region_minimizer trust_region_minimizer.cc)
 # target_link_libraries(trust_region_minimizer sapien)
