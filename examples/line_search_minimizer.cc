@@ -34,25 +34,26 @@ int main(int argc, char** argv) {
 
   // Init minimizer
   LineSearchMinimizer::Options options;
-  options.max_num_iterations = 50;
+  options.max_num_iterations = 10;
   LineSearchMinimizer minimizer(options);
 
-  const int N = 10;
-  test_prob::Rosenbrock rosen(N);
-  double solution[N];
-  for (int i = 0; i < N; ++i) { solution[i] = 0.0; }
+  // const int N = 2;
+  // test_prob::Rosenbrock rosen(N);
+  // double solution[N];
+  // for (int i = 0; i < N; ++i) { solution[i] = 0.0; }
+  test_prob::Himmelblau himmelblau;
+  double solution[2] = {-0.9, -1.7};
 
-  LOG(INFO) << "Value of Rosenbrock at starting point: "
-            << rosen(solution);
+  LOG(INFO) << "Value at starting point: " << himmelblau(solution);
 
-  minimizer.Minimize(rosen, solution);
+  minimizer.Minimize(himmelblau, solution);
 
-  LOG(INFO) << "Estimated minimizer of " << N << " dimensional Rosenbrock:";
-  for (int i = 0; i < N; ++i) {
+  LOG(INFO) << "Estimated minimizer:";
+  for (int i = 0; i < 2; ++i) {
     LOG(INFO) << solution[i];
   }
 
-  LOG(INFO) << "Estimated minima:  " << rosen(solution);
+  LOG(INFO) << "Estimated minima:  " << himmelblau(solution);
 
   return 0;
 }
