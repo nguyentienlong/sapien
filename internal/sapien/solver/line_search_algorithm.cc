@@ -26,9 +26,9 @@ Create(const LineSearchMinimizer::Options& options) {
       // if (options.preconditioner == nullptr) {
       //   return new PlainCG(options);
       // } else {
-      //   return new PreconditionedCG(options);
+      //   return new PolakRibiereCG(options);
       // }
-      return new PreconditionedCG(options);
+      return new PolakRibiereCG(options);
     case sapien::LBFGS:
       // return new LimitedMemoryBFGS(options);
       return nullptr;
@@ -126,11 +126,11 @@ DoMinimize(const FirstOrderFunction& obj_function,
 // See https://www.cs.cmu.edu/~quake-papers/painless-conjugate-gradient.pdf
 // ------------------------------------------------------------------------
 
-PreconditionedCG::
-PreconditionedCG(const LineSearchMinimizer::Options& options)
+PolakRibiereCG::
+PolakRibiereCG(const LineSearchMinimizer::Options& options)
     : LineSearchAlgorithm(options) {}
 
-void PreconditionedCG::DoMinimize(const FirstOrderFunction& function,
+void PolakRibiereCG::DoMinimize(const FirstOrderFunction& function,
                                   double* solution) const {
   CHECK_NOTNULL(solution);
 

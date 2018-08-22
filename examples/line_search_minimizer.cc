@@ -65,9 +65,8 @@ int main(int argc, char** argv) {
   // gradient
   LineSearchMinimizer m1;
 
-  // Custom minimizer using steepest descent.
-  // Using steepst descent to estimate the global minimizer of Rosenbrock
-  // function is probably the worst decision you'll ever make in your life!
+  // Custom minimizer using preconditioned nonlinear conjugate gradients
+  // with Polak-Ribiere parameter and identity preconditioner
   Preconditioner* M = new IdentityPreconditioner();
   LineSearchMinimizer::Options options;
   options.line_search_direction_type = sapien::NONLINEAR_CONJUGATE_GRADIENT;

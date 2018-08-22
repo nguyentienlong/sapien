@@ -56,9 +56,9 @@ class SteepestDescent : public LineSearchAlgorithm {
 };
 
 // Preconditioned nonlinear conjugate gradient with Polak-Ribiere parameter
-class PreconditionedCG : public LineSearchAlgorithm {
+class PolakRibiereCG : public LineSearchAlgorithm {
  public:
-  explicit PreconditionedCG(const LineSearchMinimizer::Options& options);
+  explicit PolakRibiereCG(const LineSearchMinimizer::Options& options);
 
  private:
   virtual void DoMinimize(const FirstOrderFunction& obj_function,
